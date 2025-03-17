@@ -1,0 +1,65 @@
+name: "Security Tests"
+
+on:
+  pull_request:
+    branches:
+      - '**'
+
+permissions:
+  checks: write
+  contents: read
+
+env:
+  POSTGRES_DB: bc
+  POSTGRES_PASSWORD: bc
+  POSTGRES_USER: bc
+  URL: http://localhost:3000
+
+jobs:
+  security-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Install dependencies
+        run: npm ci --no-audit
+
+      - name: Install SecTester dependencies
+        run: npm i --save-dev @sectester/core @sectester/repeater @sectester/scan @sectester/runner
+
+      - name: Create .env file
+        run: |
+          echo "BRIGHT_TOKEN=${{ secrets.BRIGHT_TOKEN }}" >> .env
+          echo "SEC_TESTER_TARGET=${{ secrets.SEC_TESTER_TARGET }}" >> .env
+
+      - name: Start services
+        run: docker compose --file=docker-compose.local.yml up -d
+
+      - name: Wait for application to be ready
+        run: |
+          until nc -zv 127.0.0.1 3000; do
+            echo "Waiting for application to be ready..."
+            sleep 5
+          done
+
+      - name: Run security tests
+        env:
+          BRIGHT_HOSTNAME: ${{ vars.BRIGHT_HOSTNAME }}
+          BRIGHT_PROJECT_ID: ${{ vars.BRIGHT_PROJECT_ID }}
+          BRIGHT_TOKEN: ${{ secrets.BRIGHT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRIGHT_TARGET_URL: http://127.0.0.1:3000
+        run: |
+          node --experimental-transform-types --experimental-strip-types --experimental-detect-module \
+          --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=ExperimentalWarning \
+          --test-force-exit --test .brightsec/tests/*.test.ts --test-concurrency=4
+
+      - name: Stop services
+        if: always()
+        run: docker compose --file=docker-compose.local.yml down
