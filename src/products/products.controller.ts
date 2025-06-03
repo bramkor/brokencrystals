@@ -102,7 +102,7 @@ export class ProductsController {
     @Query('limit') limit: number
   ): Promise<ProductDto[]> {
     this.logger.debug('Get latest products.');
-    const MAX_LIMIT = 50; // Define a maximum limit for the number of products
+    const MAX_LIMIT = 20; // Lowered the maximum limit for the number of products
     if (limit && isNaN(limit)) {
       throw new BadRequestException('Limit must be a number');
     }
