@@ -109,6 +109,9 @@ export class ProductsController {
     if (limit && limit < 0) {
       throw new BadRequestException('Limit must be positive');
     }
+    if (limit && limit > MAX_LIMIT) {
+      throw new BadRequestException(`Limit cannot exceed ${MAX_LIMIT}`);
+    }
     const effectiveLimit = Math.min(limit || 3, MAX_LIMIT); // Apply the maximum limit constraint
     const products = await this.productsService.findLatest(effectiveLimit);
     return products.map((p: Product) => new ProductDto(p));
