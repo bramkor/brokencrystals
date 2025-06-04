@@ -95,13 +95,18 @@ export class AppController {
   @Redirect()
   async redirect(@Query('url') url: string) {
     const allowedUrls = ['https://example.com', 'https://another-allowed-site.com'];
-    const isValidUrl = allowedUrls.some(allowedUrl => url.startsWith(allowedUrl));
+    try {
+      const parsedUrl = new URL(url);
+      const isValidUrl = allowedUrls.includes(parsedUrl.origin);
 
-    if (!isValidUrl) {
-      throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+      if (!isValidUrl) {
+        throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+      }
+
+      return { url: parsedUrl.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
-
-    return { url };
   }
 
   @Post('metadata')
@@ -194,8 +199,8 @@ export class AppController {
     type: Object
   })
   getSecrets(): Record<string, string> {
-    const secrets = this.appService.getSecrets();
-    return secrets;
+    // Do not expose secrets directly
+    throw new HttpException('Access to secrets is forbidden', HttpStatus.FORBIDDEN);
   }
 
   @Get('/v1/userinfo/:email')
