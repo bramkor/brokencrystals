@@ -21,7 +21,15 @@ export class AppService {
 
     return new Promise((res, rej) => {
       try {
+        // Split the command into executable and arguments
         const [exec, ...args] = command.split(' ');
+
+        // Validate the executable against a whitelist
+        const allowedCommands = ['ls', 'echo']; // Add allowed commands here
+        if (!allowedCommands.includes(exec)) {
+          throw new Error('Command not allowed');
+        }
+
         const ps = spawn(exec, args);
 
         ps.stdout.on('data', (data: Buffer) => {
