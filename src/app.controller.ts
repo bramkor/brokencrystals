@@ -39,7 +39,6 @@ import {
   API_DESC_LAUNCH_COMMAND,
   API_DESC_OPTIONS_REQUEST,
   API_DESC_REDIRECT_REQUEST,
-  API_DESC_RENDER_REQUEST,
   API_DESC_XML_METADATA,
   SWAGGER_DESC_SECRETS,
   SWAGGER_DESC_NESTED_JSON
@@ -88,10 +87,15 @@ export class AppController {
   @Redirect()
   async redirect(@Query('url') url: string) {
     const allowedUrls = ['https://example.com', 'https://another-allowed-site.com'];
-    if (!allowedUrls.includes(url)) {
-      throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
+    try {
+      const parsedUrl = new URL(url);
+      if (!allowedUrls.includes(parsedUrl.origin)) {
+        throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
+      }
+      return { url: parsedUrl.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
-    return { url };
   }
 
   @Post('metadata')
