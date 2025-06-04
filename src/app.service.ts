@@ -21,7 +21,15 @@ export class AppService {
 
     return new Promise((res, rej) => {
       try {
+        // Split the command into executable and arguments
         const [exec, ...args] = command.split(' ');
+
+        // Validate the executable against a whitelist
+        const allowedCommands = ['ls', 'echo']; // Add allowed commands here
+        if (!allowedCommands.includes(exec)) {
+          throw new Error('Command not allowed');
+        }
+
         const ps = spawn(exec, args);
 
         ps.stdout.on('data', (data: Buffer) => {
@@ -47,27 +55,11 @@ export class AppService {
 
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
-    const dbSchema = this.configService.get<string>(
-        OrmModuleConfigProperties.ENV_DATABASE_SCHEMA
-      ),
-      dbHost = this.configService.get<string>(
-        OrmModuleConfigProperties.ENV_DATABASE_HOST
-      ),
-      dbPort = this.configService.get<string>(
-        OrmModuleConfigProperties.ENV_DATABASE_PORT
-      ),
-      dbUser = this.configService.get<string>(
-        OrmModuleConfigProperties.ENV_DATABASE_USER
-      ),
-      dbPwd = this.configService.get<string>(
-        OrmModuleConfigProperties.ENV_DATABASE_PASSWORD
-      );
-
+    // Fetch only non-sensitive configuration details
     return {
       awsBucket: this.configService.get<string>(
         AppModuleConfigProperties.ENV_AWS_BUCKET
       ),
-      sql: `postgres://${dbUser}:${dbPwd}@${dbHost}:${dbPort}/${dbSchema} `,
       googlemaps: this.configService.get<string>(
         AppModuleConfigProperties.ENV_GOOGLE_MAPS
       )
