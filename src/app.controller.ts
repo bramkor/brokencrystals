@@ -99,6 +99,10 @@ export class AppController {
       if (!allowedDomains.includes(parsedUrl.hostname)) {
         throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
       }
+      // Ensure the URL path is empty or matches a specific pattern
+      if (parsedUrl.pathname !== '/' && !/^\/allowed-path/.test(parsedUrl.pathname)) {
+        throw new HttpException('URL path not allowed', HttpStatus.FORBIDDEN);
+      }
       return { url: parsedUrl.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
@@ -197,6 +201,7 @@ export class AppController {
     type: Object
   })
   getSecrets(): Record<string, string> {
+    // Removed hardcoded secrets and fetch from environment variables
     const secrets = this.appService.getSecrets();
     return secrets;
   }

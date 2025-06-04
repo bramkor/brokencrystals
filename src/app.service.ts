@@ -66,6 +66,23 @@ export class AppService {
     };
   }
 
+  getSecrets(): Record<string, string> {
+    this.logger.debug('Fetching secrets from environment variables');
+    // Fetch secrets from environment variables
+    return {
+      codeclimate: process.env.CODECLIMATE_REPO_TOKEN || '',
+      facebook: process.env.FACEBOOK_TOKEN || '',
+      google_b64: process.env.GOOGLE_B64 || '',
+      google_oauth: process.env.GOOGLE_OAUTH || '',
+      google_oauth_token: process.env.GOOGLE_OAUTH_TOKEN || '',
+      heroku: process.env.HEROKU_TOKEN || '',
+      hockey_app: process.env.HOCKEY_APP_TOKEN || '',
+      outlook: process.env.OUTLOOK_WEBHOOK || '',
+      paypal: process.env.PAYPAL_ACCESS_TOKEN || '',
+      slack: process.env.SLACK_TOKEN || ''
+    };
+  }
+
   async getUserInfo(email: string): Promise<UserDto> {
     try {
       this.logger.debug(`Find a user by email: ${email}`);
