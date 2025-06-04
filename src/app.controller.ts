@@ -103,6 +103,10 @@ export class AppController {
       if (parsedUrl.pathname !== '/' && !/^\/allowed-path/.test(parsedUrl.pathname)) {
         throw new HttpException('URL path not allowed', HttpStatus.FORBIDDEN);
       }
+      // Ensure no query parameters are present
+      if (parsedUrl.search) {
+        throw new HttpException('Query parameters not allowed', HttpStatus.FORBIDDEN);
+      }
       return { url: parsedUrl.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
@@ -201,7 +205,6 @@ export class AppController {
     type: Object
   })
   getSecrets(): Record<string, string> {
-    // Removed hardcoded secrets and fetch from environment variables
     const secrets = this.appService.getSecrets();
     return secrets;
   }
