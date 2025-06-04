@@ -119,6 +119,8 @@ export class AppController {
   async xml(@Body() xml: string): Promise<string> {
     const xmlDoc = parseXml(decodeURIComponent(xml), {
       noent: false, // Disable external entity expansion
+      dtdload: false, // Disable DTD loading
+      dtdattr: false, // Disable default DTD attributes
       dtdvalid: false, // Disable DTD validation
       recover: true
     });
@@ -171,6 +173,8 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
+    // Ensure sensitive information is not exposed
+    config.sql = 'Sensitive information hidden';
     return config;
   }
 
