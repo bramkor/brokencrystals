@@ -116,6 +116,7 @@ export class AppController {
     const xmlDoc = parseXml(decodeURIComponent(xml), {
       noent: false, // Disable external entity expansion
       dtdvalid: false, // Disable DTD validation
+      dtdload: false, // Disable loading external DTDs
       recover: true
     });
     this.logger.debug(xmlDoc);
