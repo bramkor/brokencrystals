@@ -113,9 +113,11 @@ export class AppController {
   })
   @Header('content-type', 'text/xml')
   async xml(@Body() xml: string): Promise<string> {
-    const xmlDoc = parseXml(decodeURIComponent(xml), {
-      noent: true,
-      dtdvalid: true,
+    // Strip DOCTYPE declaration manually
+    const sanitizedXml = xml.replace(/<!DOCTYPE[^>]*>/i, '');
+    const xmlDoc = parseXml(decodeURIComponent(sanitizedXml), {
+      noent: false, // Disable external entity expansion
+      dtdvalid: false, // Disable DTD validation
       recover: true
     });
     this.logger.debug(xmlDoc);
