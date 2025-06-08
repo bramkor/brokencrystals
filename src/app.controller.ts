@@ -87,6 +87,10 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
+    const allowedUrls = ['https://example.com', 'https://another-allowed-site.com'];
+    if (!allowedUrls.includes(url)) {
+      throw new HttpException('URL not allowed', HttpStatus.BAD_REQUEST);
+    }
     return { url };
   }
 
@@ -169,7 +173,11 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
-    return config;
+    return {
+      awsBucket: config.awsBucket,
+      sql: '***', // Masked sensitive information
+      googlemaps: '***' // Masked sensitive information
+    };
   }
 
   @Get('/secrets')
