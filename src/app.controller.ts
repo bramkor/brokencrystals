@@ -97,6 +97,7 @@ export class AppController {
       if (parsedUrl.pathname !== '/' && parsedUrl.pathname !== '') {
         throw new HttpException('URL path not allowed', HttpStatus.FORBIDDEN);
       }
+      // Return only the origin to prevent any query parameters from being used
       return { url: parsedUrl.origin };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
