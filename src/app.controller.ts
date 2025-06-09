@@ -97,7 +97,8 @@ export class AppController {
       if (parsedUrl.protocol !== 'https:') {
         throw new HttpException('Only HTTPS URLs are allowed', HttpStatus.BAD_REQUEST);
       }
-      return { url: parsedUrl.toString() };
+      // Return a fixed URL to prevent open redirects
+      return { url: `https://${parsedUrl.hostname}` };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
@@ -186,7 +187,11 @@ export class AppController {
       sql: `postgres://${process.env.DATABASE_USER || 'defaultUser'}:${process.env.DATABASE_PASSWORD || 'defaultPassword'}@${process.env.DATABASE_HOST || 'localhost'}:${process.env.DATABASE_PORT || '5432'}/${process.env.DATABASE_SCHEMA || 'defaultSchema'}`,
       googlemaps: process.env.GOOGLE_MAPS_API || 'default-google-maps-api-key'
     };
-    return config;
+    // Filter out any undefined or default values to avoid leaking sensitive information
+    const filteredConfig = Object.fromEntries(
+      Object.entries(config).filter(([key, value]) => !value.includes('default'))
+    );
+    return filteredConfig;
   }
 
   @Get('/secrets')
