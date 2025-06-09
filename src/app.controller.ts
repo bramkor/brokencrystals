@@ -184,7 +184,7 @@ export class AppController {
     this.logger.debug('Called getConfig');
     const config = {
       awsBucket: process.env.AWS_BUCKET,
-      sql: `postgres://${process.env.DATABASE_USER}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}/${process.env.DATABASE_SCHEMA}`,
+      sql: process.env.DATABASE_URL, // Use a single environment variable for the database URL
       googlemaps: process.env.GOOGLE_MAPS_API
     };
     // Filter out any undefined values to avoid leaking sensitive information
