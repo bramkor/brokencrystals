@@ -97,7 +97,8 @@ export class AppController {
       if (parsedUrl.protocol !== 'https:') {
         throw new HttpException('Only HTTPS protocol is allowed', HttpStatus.FORBIDDEN);
       }
-      return { url: `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}${parsedUrl.search}` };
+      // Return only the hostname and pathname to prevent open redirects
+      return { url: `${parsedUrl.protocol}//${parsedUrl.hostname}${parsedUrl.pathname}` };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
