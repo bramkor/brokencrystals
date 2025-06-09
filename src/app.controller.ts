@@ -94,6 +94,9 @@ export class AppController {
         throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
       }
       // Ensure the URL is not modified by using the original protocol and host
+      if (parsedUrl.protocol !== 'https:') {
+        throw new HttpException('Only HTTPS protocol is allowed', HttpStatus.FORBIDDEN);
+      }
       return { url: `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}${parsedUrl.search}` };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
