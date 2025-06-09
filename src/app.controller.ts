@@ -97,7 +97,8 @@ export class AppController {
       if (parsedUrl.protocol !== 'https:') {
         throw new HttpException('Only HTTPS URLs are allowed', HttpStatus.BAD_REQUEST);
       }
-      return { url: parsedUrl.toString() };
+      // Return a fixed path to prevent open redirect
+      return { url: `https://${parsedUrl.hostname}/fixed-path` };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
@@ -184,6 +185,7 @@ export class AppController {
     const config = this.appService.getConfig();
     // Remove sensitive information from the response
     delete config.sql;
+    delete config.awsBucket; // Ensure AWS bucket information is not exposed
     return config;
   }
 
