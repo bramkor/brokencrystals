@@ -97,8 +97,8 @@ export class AppController {
       if (parsedUrl.protocol !== 'https:') {
         throw new HttpException('Only HTTPS URLs are allowed', HttpStatus.BAD_REQUEST);
       }
-      // Return a fixed path to prevent open redirect
-      return { url: `https://${parsedUrl.hostname}/fixed-path` };
+      // Redirect to a predefined path on the allowed domain
+      return { url: `https://${parsedUrl.hostname}/safe-redirect` };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
@@ -186,6 +186,7 @@ export class AppController {
     // Remove sensitive information from the response
     delete config.sql;
     delete config.awsBucket; // Ensure AWS bucket information is not exposed
+    delete config.secretTokens; // Ensure secret tokens are not exposed
     return config;
   }
 
@@ -265,7 +266,7 @@ export class AppController {
       }
     }
   })
-  async getUserInfoV2(@Param('email') email: string): Promise<UserDto> {
+  async getUserInfoV2(@Param('email') email: Promise<UserDto> {
     try {
       return await this.appService.getUserInfo(email);
     } catch (err) {
