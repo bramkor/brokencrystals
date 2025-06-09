@@ -94,7 +94,11 @@ export class AppController {
       if (!allowedDomains.includes(parsedUrl.hostname)) {
         throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
       }
-      return { url };
+      // Ensure the path is not empty or suspicious
+      if (!parsedUrl.pathname || parsedUrl.pathname === '/') {
+        throw new HttpException('Invalid URL path', HttpStatus.BAD_REQUEST);
+      }
+      return { url: parsedUrl.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
@@ -179,7 +183,12 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
-    return config;
+    // Ensure sensitive information is not logged or exposed
+    return {
+      awsBucket: config.awsBucket,
+      sql: 'Sensitive information hidden',
+      googlemaps: 'Sensitive information hidden'
+    };
   }
 
   @Get('/secrets')
