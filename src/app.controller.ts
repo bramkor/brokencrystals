@@ -97,8 +97,8 @@ export class AppController {
       if (parsedUrl.protocol !== 'https:') {
         throw new HttpException('Only HTTPS URLs are allowed', HttpStatus.BAD_REQUEST);
       }
-      // Return a fixed URL to prevent open redirects
-      return { url: `https://${parsedUrl.hostname}` };
+      // Return the full URL if it passes all checks
+      return { url: parsedUrl.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
@@ -183,13 +183,13 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = {
-      awsBucket: process.env.AWS_BUCKET || 'default-bucket-url',
-      sql: `postgres://${process.env.DATABASE_USER || 'defaultUser'}:${process.env.DATABASE_PASSWORD || 'defaultPassword'}@${process.env.DATABASE_HOST || 'localhost'}:${process.env.DATABASE_PORT || '5432'}/${process.env.DATABASE_SCHEMA || 'defaultSchema'}`,
-      googlemaps: process.env.GOOGLE_MAPS_API || 'default-google-maps-api-key'
+      awsBucket: process.env.AWS_BUCKET,
+      sql: `postgres://${process.env.DATABASE_USER}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}/${process.env.DATABASE_SCHEMA}`,
+      googlemaps: process.env.GOOGLE_MAPS_API
     };
-    // Filter out any undefined or default values to avoid leaking sensitive information
+    // Filter out any undefined values to avoid leaking sensitive information
     const filteredConfig = Object.fromEntries(
-      Object.entries(config).filter(([key, value]) => !value.includes('default'))
+      Object.entries(config).filter(([key, value]) => value !== undefined)
     );
     return filteredConfig;
   }
