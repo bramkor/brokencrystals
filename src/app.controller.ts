@@ -93,7 +93,8 @@ export class AppController {
       if (!allowedDomains.includes(parsedUrl.hostname)) {
         throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
       }
-      return { url };
+      // Ensure the URL is not modified by using the original protocol and host
+      return { url: `${parsedUrl.protocol}//${parsedUrl.host}${parsedUrl.pathname}${parsedUrl.search}` };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
