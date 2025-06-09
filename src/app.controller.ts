@@ -87,11 +87,11 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    const allowedUrls = ['https://example.com', 'https://another-allowed-site.com'];
+    const allowedUrls = ['example.com', 'another-allowed-site.com'];
     try {
       const parsedUrl = new URL(url);
       // Check against the allowlist using the hostname instead of origin
-      if (!allowedUrls.some(allowedUrl => parsedUrl.hostname === new URL(allowedUrl).hostname)) {
+      if (!allowedUrls.includes(parsedUrl.hostname)) {
         throw new HttpException('URL not allowed', HttpStatus.BAD_REQUEST);
       }
       return { url: parsedUrl.toString() };
