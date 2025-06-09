@@ -90,7 +90,8 @@ export class AppController {
     const allowedUrls = ['https://example.com', 'https://another-allowed-site.com'];
     try {
       const parsedUrl = new URL(url);
-      if (!allowedUrls.includes(parsedUrl.origin)) {
+      // Check against the allowlist using the hostname instead of origin
+      if (!allowedUrls.some(allowedUrl => parsedUrl.hostname === new URL(allowedUrl).hostname)) {
         throw new HttpException('URL not allowed', HttpStatus.BAD_REQUEST);
       }
       return { url: parsedUrl.toString() };
