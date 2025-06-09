@@ -88,10 +88,15 @@ export class AppController {
   @Redirect()
   async redirect(@Query('url') url: string) {
     const allowedUrls = ['https://example.com', 'https://another-allowed-site.com'];
-    if (!allowedUrls.includes(url)) {
-      throw new HttpException('URL not allowed', HttpStatus.BAD_REQUEST);
+    try {
+      const parsedUrl = new URL(url);
+      if (!allowedUrls.includes(parsedUrl.origin)) {
+        throw new HttpException('URL not allowed', HttpStatus.BAD_REQUEST);
+      }
+      return { url: parsedUrl.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
-    return { url };
   }
 
   @Post('metadata')
