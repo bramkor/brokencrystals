@@ -172,7 +172,9 @@ export class AppController {
     // Remove sensitive information from the config before returning
     delete config.secretToken;
     delete config.sql; // Ensure database connection string is not exposed
-    return config;
+    // Ensure no other sensitive information is exposed
+    const { secretToken, sql, ...safeConfig } = config;
+    return safeConfig;
   }
 
   @Get('/secrets')
