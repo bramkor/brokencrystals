@@ -88,6 +88,10 @@ export class AppController {
   @Redirect()
   async redirect(@Query('url') url: string) {
     const allowedDomains = ['example.com', 'another-allowed-domain.com'];
+    const safeRedirects = {
+      'example.com': 'https://example.com/safe-redirect',
+      'another-allowed-domain.com': 'https://another-allowed-domain.com/safe-redirect'
+    };
     try {
       const parsedUrl = new URL(url);
       if (!allowedDomains.includes(parsedUrl.hostname)) {
@@ -97,8 +101,8 @@ export class AppController {
       if (parsedUrl.protocol !== 'https:') {
         throw new HttpException('Only HTTPS URLs are allowed', HttpStatus.FORBIDDEN);
       }
-      // Redirect to a predefined safe URL
-      return { url: `https://example.com/safe-redirect` };
+      // Redirect to a predefined safe URL based on the domain
+      return { url: safeRedirects[parsedUrl.hostname] };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
