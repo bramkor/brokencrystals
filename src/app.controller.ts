@@ -179,6 +179,8 @@ export class AppController {
     }
     // Ensure no other sensitive information is exposed
     const { sensitiveData, ...safeConfig } = config;
+    // Log the safe config for debugging purposes
+    this.logger.debug('Safe config:', safeConfig);
     return safeConfig;
   }
 
