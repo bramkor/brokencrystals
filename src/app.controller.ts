@@ -186,7 +186,8 @@ export class AppController {
   getSecrets(): Record<string, string> {
     // Removed hardcoded secrets and replaced with a secure method to fetch them
     const secrets = this.appService.getSecrets();
-    return secrets;
+    // Ensure no secrets are returned in the response
+    return {};
   }
 
   @Get('/v1/userinfo/:email')
