@@ -173,6 +173,10 @@ export class AppController {
     if (config && config.database) {
       delete config.database.connectionString;
     }
+    // Remove any secret tokens from the config
+    if (config && config.secretTokens) {
+      delete config.secretTokens;
+    }
     return config;
   }
 
