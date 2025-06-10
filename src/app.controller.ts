@@ -170,9 +170,6 @@ export class AppController {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
     // Remove sensitive information from the config before returning
-    delete config.secretToken;
-    delete config.sql; // Ensure database connection string is not exposed
-    // Ensure no other sensitive information is exposed
     const { secretToken, sql, ...safeConfig } = config;
     return safeConfig;
   }
