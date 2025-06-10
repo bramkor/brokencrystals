@@ -177,7 +177,9 @@ export class AppController {
     if (config && config.secretTokens) {
       delete config.secretTokens;
     }
-    return config;
+    // Ensure no other sensitive information is exposed
+    const { sensitiveData, ...safeConfig } = config;
+    return safeConfig;
   }
 
   @Get('/secrets')
