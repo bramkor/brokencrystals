@@ -169,6 +169,10 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
+    // Remove sensitive information from the config before returning
+    if (config.sql) {
+      config.sql = config.sql.replace(/:[^@]+@/, ':<REDACTED>@');
+    }
     return config;
   }
 
