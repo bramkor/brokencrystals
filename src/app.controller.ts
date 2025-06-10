@@ -93,7 +93,11 @@ export class AppController {
       if (!allowedDomains.includes(parsedUrl.hostname)) {
         throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
       }
-      return { url };
+      // Ensure the URL path is not empty and does not contain suspicious patterns
+      if (!parsedUrl.pathname || /[<>"'%;()&+]/.test(parsedUrl.pathname)) {
+        throw new HttpException('Invalid URL path', HttpStatus.BAD_REQUEST);
+      }
+      return { url: parsedUrl.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
@@ -177,8 +181,11 @@ export class AppController {
   })
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
+    // Ensure sensitive information is not exposed
     const config = this.appService.getConfig();
-    return config;
+    const sanitizedConfig = { ...config };
+    delete sanitizedConfig.secretToken; // Remove sensitive data
+    return sanitizedConfig;
   }
 
   @Get('/secrets')
