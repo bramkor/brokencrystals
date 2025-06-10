@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/config', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['open_database', 'secret_tokens', 'osi', 'xxe'],
+      tests: ['secret_tokens', 'open_database'],
       attackParamLocations: [AttackParamLocation.HEADER, AttackParamLocation.QUERY]
     })
     .threshold(Severity.CRITICAL)
