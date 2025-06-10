@@ -93,7 +93,11 @@ export class AppController {
       if (!allowedHosts.includes(parsedUrl.hostname)) {
         throw new HttpException('URL not allowed', HttpStatus.BAD_REQUEST);
       }
-      return { url };
+      // Ensure the URL path is empty to prevent open redirects
+      if (parsedUrl.pathname !== '/' && parsedUrl.pathname !== '') {
+        throw new HttpException('URL path not allowed', HttpStatus.BAD_REQUEST);
+      }
+      return { url: parsedUrl.origin };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
@@ -180,6 +184,7 @@ export class AppController {
     const config = this.appService.getConfig();
     // Remove sensitive information before returning
     config.sql = 'REDACTED';
+    config.googlemaps = 'REDACTED';
     return config;
   }
 
