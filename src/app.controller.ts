@@ -172,7 +172,7 @@ export class AppController {
     // Remove sensitive information before returning
     delete config.sql;
     delete config.secretTokens; // Ensure secret tokens are not exposed
-    return config;
+    return JSON.parse(JSON.stringify(config)); // Deep copy to ensure no references to sensitive data
   }
 
   @Get('/secrets')
