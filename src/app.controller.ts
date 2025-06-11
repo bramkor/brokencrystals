@@ -92,7 +92,7 @@ export class AppController {
     const allowedDomains = ['google.com', 'example.com']; // Define allowed domains
     try {
       const urlObj = new URL(url);
-      if (!allowedDomains.some(domain => urlObj.hostname.endsWith(domain))) {
+      if (!allowedDomains.some(domain => urlObj.hostname === domain)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
     } catch (error) {
@@ -182,6 +182,7 @@ export class AppController {
     const config = this.appService.getConfig();
     // Remove sensitive information from the config before returning
     delete config.secretToken;
+    delete config.sql; // Ensure database connection strings are not exposed
     return config;
   }
 
