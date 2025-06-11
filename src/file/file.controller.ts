@@ -89,12 +89,24 @@ export class FileController {
     if (!this.isValidPath(path)) {
       throw new BadRequestException('Invalid file path');
     }
-    const sanitizedPath = path.replace(/\..\/|\/\../g, ''); // Remove any parent directory traversal
-    const file: Stream = await this.fileService.getFile(sanitizedPath);
-    const type = this.getContentType(contentType);
-    res.type(type);
+    const sanitizedPath = path.replace(/\.\.|\/\.\./g, ''); // Remove any parent directory traversal
+    const basePath = path.resolve('config/products/crystals'); // Define a base directory
+    const fullPath = path.join(basePath, sanitizedPath);
 
-    return file;
+    if (!fullPath.startsWith(basePath)) {
+      throw new BadRequestException('Invalid file path');
+    }
+
+    try {
+      const file: Stream = await this.fileService.getFile(fullPath);
+      const type = this.getContentType(contentType);
+      res.type(type);
+
+      return file;
+    } catch (err) {
+      this.logger.error('Error reading file', err);
+      throw new BadRequestException('File could not be read');
+    }
   }
 
   @Get('/google')

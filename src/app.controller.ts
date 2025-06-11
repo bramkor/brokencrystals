@@ -39,7 +39,6 @@ import {
   API_DESC_LAUNCH_COMMAND,
   API_DESC_OPTIONS_REQUEST,
   API_DESC_REDIRECT_REQUEST,
-  API_DESC_RENDER_REQUEST,
   API_DESC_XML_METADATA,
   SWAGGER_DESC_SECRETS,
   SWAGGER_DESC_NESTED_JSON
@@ -92,6 +91,10 @@ export class AppController {
       const parsedUrl = new URL(url);
       if (!allowedDomains.includes(parsedUrl.hostname)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+      }
+      // Ensure the URL is using HTTPS
+      if (parsedUrl.protocol !== 'https:') {
+        throw new HttpException('Only HTTPS URLs are allowed', HttpStatus.BAD_REQUEST);
       }
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
