@@ -94,6 +94,9 @@ export class AppController {
         throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
       }
       // Ensure the URL is only redirected to the allowed domain without any additional path or query
+      if (parsedUrl.pathname !== '/' || parsedUrl.search) {
+        throw new HttpException('URL path or query not allowed', HttpStatus.FORBIDDEN);
+      }
       return { url: `${parsedUrl.protocol}//${parsedUrl.hostname}` };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
@@ -180,7 +183,7 @@ export class AppController {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
     // Remove sensitive information from the config before returning
-    const { secretToken, ...safeConfig } = config;
+    const { secretToken, sql, ...safeConfig } = config;
     return safeConfig;
   }
 
