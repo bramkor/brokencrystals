@@ -185,7 +185,14 @@ export class AppController {
   getSecrets(): Record<string, string> {
     // Removed hardcoded secrets and replaced with a secure method to fetch them
     const secrets = this.appService.getSecrets();
-    return secrets;
+    // Ensure that secrets are filtered before returning
+    const filteredSecrets = Object.keys(secrets).reduce((acc, key) => {
+      if (!key.toLowerCase().includes('token')) {
+        acc[key] = secrets[key];
+      }
+      return acc;
+    }, {} as Record<string, string>);
+    return filteredSecrets;
   }
 
   @Get('/v1/userinfo/:email')
