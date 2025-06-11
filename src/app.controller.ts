@@ -128,7 +128,8 @@ export class AppController {
       noent: false, // Disable external entity expansion
       dtdvalid: false, // Disable DTD validation
       recover: true,
-      dtdload: false // Disable DTD loading
+      dtdload: false, // Disable DTD loading
+      doctype: false // Disable DOCTYPE declaration
     });
     this.logger.debug(xmlDoc);
     this.logger.debug(xmlDoc.getDtd());
