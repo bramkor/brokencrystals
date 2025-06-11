@@ -182,6 +182,10 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AWS,
       path
@@ -220,6 +224,10 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path
