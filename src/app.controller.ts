@@ -171,6 +171,7 @@ export class AppController {
     const config = this.appService.getConfig();
     // Remove sensitive information before returning
     delete config.sql;
+    delete config.secretTokens; // Ensure secret tokens are not exposed
     return config;
   }
 
