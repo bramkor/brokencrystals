@@ -16,12 +16,11 @@ export class AppService {
     private readonly userService: UsersService
   ) {}
 
-  async launchCommand(command: string): Promise<string> {
-    this.logger.debug(`launch ${command} command`);
+  async launchCommand(exec: string, args: string[]): Promise<string> {
+    this.logger.debug(`launch ${exec} command with args ${args}`);
 
     return new Promise((res, rej) => {
       try {
-        const [exec, ...args] = command.split(' ');
         const ps = spawn(exec, args);
 
         ps.stdout.on('data', (data: Buffer) => {
