@@ -90,7 +90,7 @@ export class AppController {
     const allowedUrls = ['https://example.com', 'https://another-allowed-url.com'];
     try {
       const urlObj = new URL(url);
-      if (!allowedUrls.some(allowedUrl => urlObj.href.startsWith(allowedUrl))) {
+      if (!allowedUrls.includes(urlObj.origin)) {
         throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
       }
       return { url: urlObj.toString() };
@@ -185,7 +185,7 @@ export class AppController {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
     // Ensure sensitive information is not exposed
-    const { secretToken, sql, ...safeConfig } = config;
+    const { secretToken, sql, googlemaps, ...safeConfig } = config;
     return safeConfig;
   }
 
