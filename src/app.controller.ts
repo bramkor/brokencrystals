@@ -88,8 +88,13 @@ export class AppController {
   @Redirect()
   async redirect(@Query('url') url: string) {
     const allowedUrls = ['https://example.com', 'https://another-allowed-url.com'];
-    if (!allowedUrls.includes(url)) {
-      throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
+    try {
+      const parsedUrl = new URL(url);
+      if (!allowedUrls.includes(parsedUrl.origin)) {
+        throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
+      }
+    } catch (error) {
+      throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
     return { url };
   }
@@ -174,11 +179,15 @@ export class AppController {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
     // Remove any sensitive information from the config before returning
-    if (config.secretToken) {
-      this.logger.warn('Secret token was present in the config and has been removed.');
-    }
-    delete config.secretToken;
-    return config;
+    const sanitizedConfig = { ...config };
+    const sensitiveKeys = ['secretToken', 'apiKey', 'privateKey'];
+    sensitiveKeys.forEach(key => {
+      if (sanitizedConfig[key]) {
+        this.logger.warn(`${key} was present in the config and has been removed.`);
+        delete sanitizedConfig[key];
+      }
+    });
+    return sanitizedConfig;
   }
 
   @Get('/secrets')
