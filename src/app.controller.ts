@@ -92,8 +92,8 @@ export class AppController {
     const allowedDomains = ['google.com', 'example.com']; // Define allowed domains
     try {
       const urlObj = new URL(url);
-      // Check if the hostname ends with one of the allowed domains
-      if (!allowedDomains.some(domain => urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain))) {
+      // Check if the hostname matches exactly one of the allowed domains
+      if (!allowedDomains.includes(urlObj.hostname)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
     } catch (error) {
