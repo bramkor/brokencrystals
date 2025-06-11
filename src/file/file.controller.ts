@@ -86,11 +86,19 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.fileService.getFile(path);
-    const type = this.getContentType(contentType);
-    res.type(type);
+    if (!this.isValidPath(path)) {
+      throw new BadRequestException('Invalid file path');
+    }
+    try {
+      const file: Stream = await this.fileService.getFile(path);
+      const type = this.getContentType(contentType);
+      res.type(type);
 
-    return file;
+      return file;
+    } catch (err) {
+      this.logger.error('Error loading file', err);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Internal Server Error' });
+    }
   }
 
   @Get('/google')
@@ -121,6 +129,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidCloudPath(path, CloudProvidersMetaData.GOOGLE)) {
+      throw new BadRequestException('Invalid file path');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
@@ -159,6 +170,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidCloudPath(path, CloudProvidersMetaData.AWS)) {
+      throw new BadRequestException('Invalid file path');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AWS,
       path
@@ -197,6 +211,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidCloudPath(path, CloudProvidersMetaData.AZURE)) {
+      throw new BadRequestException('Invalid file path');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path
@@ -235,6 +252,9 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidCloudPath(path, CloudProvidersMetaData.DIGITAL_OCEAN)) {
+      throw new BadRequestException('Invalid file path');
+    }
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
@@ -324,5 +344,18 @@ export class FileController {
       this.logger.error(err.message);
       res.status(HttpStatus.NOT_FOUND);
     }
+  }
+
+  private isValidPath(filePath: string): boolean {
+    // Basic validation to prevent SSRF by checking for local file paths only
+    const localPathPattern = /^(?!http|https|ftp|ftps|file):\/\//;
+    const resolvedPath = path.resolve(filePath);
+    const basePath = path.resolve('config/products/crystals'); // Base directory for allowed files
+    return resolvedPath.startsWith(basePath);
+  }
+
+  private isValidCloudPath(filePath: string, baseUrl: string): boolean {
+    // Ensure the path starts with the expected cloud provider base URL
+    return filePath.startsWith(baseUrl);
   }
 }
