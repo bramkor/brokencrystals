@@ -134,6 +134,11 @@ export class AppController {
     this.logger.debug(xmlDoc);
     this.logger.debug(xmlDoc.getDtd());
 
+    // Ensure that the XML does not contain any DOCTYPE declaration
+    if (xmlDoc.getDtd()) {
+      throw new HttpException('DOCTYPE declarations are not allowed', HttpStatus.BAD_REQUEST);
+    }
+
     return xmlDoc.toString(true);
   }
 
