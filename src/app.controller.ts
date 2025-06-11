@@ -90,7 +90,7 @@ export class AppController {
     const allowedUrls = ['https://example.com', 'https://another-allowed-url.com'];
     try {
       const urlObj = new URL(url);
-      if (!allowedUrls.includes(urlObj.origin)) {
+      if (!allowedUrls.some(allowedUrl => urlObj.href.startsWith(allowedUrl))) {
         throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
       }
       return { url: urlObj.toString() };
