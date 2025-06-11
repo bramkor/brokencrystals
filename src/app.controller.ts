@@ -174,6 +174,9 @@ export class AppController {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
     // Remove any sensitive information from the config before returning
+    if (config.secretToken) {
+      this.logger.warn('Secret token was present in the config and has been removed.');
+    }
     delete config.secretToken;
     return config;
   }
