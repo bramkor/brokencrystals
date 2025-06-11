@@ -93,7 +93,8 @@ export class AppController {
       if (!allowedDomains.includes(parsedUrl.hostname)) {
         throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
       }
-      return { url };
+      // Ensure the URL is only redirected to the allowed domain without any additional path or query
+      return { url: `${parsedUrl.protocol}//${parsedUrl.hostname}` };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
@@ -179,8 +180,8 @@ export class AppController {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
     // Remove sensitive information from the config before returning
-    delete config.secretToken;
-    return config;
+    const { secretToken, ...safeConfig } = config;
+    return safeConfig;
   }
 
   @Get('/secrets')
