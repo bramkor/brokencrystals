@@ -86,11 +86,30 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.fileService.getFile(path);
-    const type = this.getContentType(contentType);
-    res.type(type);
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+    if (path.includes('..') || path.includes('\\') || path.includes('%')) {
+      throw new BadRequestException('Invalid path parameter');
+    }
 
-    return file;
+    // Ensure the path is within a specific directory
+    const basePath = path.resolve('config/products/crystals');
+    const resolvedPath = path.resolve(basePath, path);
+    if (!resolvedPath.startsWith(basePath)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+
+    try {
+      const file: Stream = await this.fileService.getFile(resolvedPath);
+      const type = this.getContentType(contentType);
+      res.type(type);
+
+      return file;
+    } catch (err) {
+      this.logger.error('File not found or inaccessible', err);
+      res.status(HttpStatus.NOT_FOUND).send({ error: 'File not found' });
+    }
   }
 
   @Get('/google')
@@ -121,6 +140,10 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
       path
@@ -235,6 +258,10 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
       path
