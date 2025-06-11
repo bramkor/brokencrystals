@@ -184,6 +184,12 @@ export class AppController {
     const config = this.appService.getConfig();
     // Remove sensitive information from the config before returning
     const { secretToken, sql, ...safeConfig } = config;
+    // Ensure no sensitive data is returned
+    for (const key in safeConfig) {
+      if (key.toLowerCase().includes('secret') || key.toLowerCase().includes('token')) {
+        delete safeConfig[key];
+      }
+    }
     return safeConfig;
   }
 
