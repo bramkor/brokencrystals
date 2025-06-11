@@ -98,7 +98,7 @@ export class AppController {
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
-    return { url };
+    return { url: parsedUrl.toString() };
   }
 
   @Post('metadata')
@@ -127,7 +127,8 @@ export class AppController {
     const xmlDoc = parseXml(decodeURIComponent(xml), {
       noent: false, // Disable external entity expansion
       dtdvalid: false, // Disable DTD validation
-      recover: true
+      recover: true,
+      dtdload: false // Disable DTD loading
     });
     this.logger.debug(xmlDoc);
     this.logger.debug(xmlDoc.getDtd());
