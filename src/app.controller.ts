@@ -169,6 +169,8 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
+    // Remove sensitive information from the config before returning
+    delete config.sql;
     return config;
   }
 
