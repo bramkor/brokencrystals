@@ -58,6 +58,35 @@ export class FileController {
     return file;
   }
 
+  private isValidPath(inputPath: string): boolean {
+    // Basic validation to ensure the path is not a URL
+    try {
+      const url = new URL(inputPath);
+      return false; // If it's a valid URL, return false
+    } catch (_) {
+      return true; // If it's not a valid URL, it's a valid path
+    }
+  }
+
+  private isValidAwsPath(inputPath: string): boolean {
+    // Allow only specific paths or patterns for AWS files
+    const allowedPatterns = [
+      /^config\/products\/crystals\//, // Example pattern
+      // Add more patterns as needed
+    ];
+    return allowedPatterns.some((pattern) => pattern.test(inputPath));
+  }
+
+  private sanitizePath(inputPath: string): string {
+    // Resolve the path to prevent directory traversal
+    const basePath = path.resolve('config/products/crystals');
+    const resolvedPath = path.resolve(basePath, inputPath);
+    if (!resolvedPath.startsWith(basePath)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+    return resolvedPath;
+  }
+
   @Get()
   @ApiQuery({
     name: 'path',
@@ -86,11 +115,24 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.fileService.getFile(path);
-    const type = this.getContentType(contentType);
-    res.type(type);
+    if (!this.isValidPath(path)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
 
-    return file;
+    try {
+      const sanitizedPath = this.sanitizePath(path);
+      const file: Stream = await this.fileService.getFile(sanitizedPath);
+      const type = this.getContentType(contentType);
+      res.type(type);
+
+      return file;
+    } catch (err) {
+      this.logger.error('Error loading file', err);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
+        error: 'Internal Server Error',
+        location: 'loadFile'
+      });
+    }
   }
 
   @Get('/google')
@@ -121,9 +163,20 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidPath(path)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+
+    // Ensure the path is within allowed directories
+    const allowedBasePath = path.resolve('config/products/crystals');
+    const resolvedPath = path.resolve(allowedBasePath, path);
+    if (!resolvedPath.startsWith(allowedBasePath)) {
+      throw new BadRequestException('Path is not allowed');
+    }
+
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.GOOGLE,
-      path
+      resolvedPath
     );
     const type = this.getContentType(contentType);
     res.type(type);
@@ -159,6 +212,10 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidAwsPath(path)) {
+      throw new BadRequestException('Invalid path parameter for AWS');
+    }
+
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AWS,
       path
@@ -197,6 +254,10 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidPath(path)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.AZURE,
       path
@@ -235,9 +296,20 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
+    if (!this.isValidPath(path)) {
+      throw new BadRequestException('Invalid path parameter');
+    }
+
+    // Ensure the path is within allowed directories
+    const allowedBasePath = path.resolve('config/products/crystals');
+    const resolvedPath = path.resolve(allowedBasePath, path);
+    if (!resolvedPath.startsWith(allowedBasePath)) {
+      throw new BadRequestException('Path is not allowed');
+    }
+
     const file: Stream = await this.loadCPFile(
       CloudProvidersMetaData.DIGITAL_OCEAN,
-      path
+      resolvedPath
     );
     const type = this.getContentType(contentType);
     res.type(type);
