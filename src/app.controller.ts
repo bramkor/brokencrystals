@@ -96,7 +96,7 @@ export class AppController {
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
-    return { url };
+    return { url: urlObj.toString() };
   }
 
   @Post('metadata')
@@ -123,7 +123,7 @@ export class AppController {
   @Header('content-type', 'text/xml')
   async xml(@Body() xml: string): Promise<string> {
     const xmlDoc = parseXml(decodeURIComponent(xml), {
-      noent: false, // Disable external entity expansion
+      noent: true, // Disable external entity expansion
       dtdvalid: false, // Disable DTD validation
       recover: true
     });
@@ -179,6 +179,8 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
+    // Remove sensitive information from the config before returning
+    delete config.secretToken;
     return config;
   }
 

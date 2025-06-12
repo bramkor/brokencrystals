@@ -89,9 +89,16 @@ export class FileController {
     if (!this.isValidPath(path)) {
       throw new BadRequestException('Invalid file path');
     }
-    const sanitizedPath = path.replace(/\.+/g, ''); // Remove any parent directory references
+    const sanitizedPath = path.replace(/\.\.+/g, ''); // Remove any parent directory references
+    const basePath = path.resolve('config/products/crystals'); // Define a base directory
+    const fullPath = path.join(basePath, sanitizedPath);
+
+    if (!fullPath.startsWith(basePath)) {
+      throw new BadRequestException('Invalid file path');
+    }
+
     try {
-      const file: Stream = await this.fileService.getFile(sanitizedPath);
+      const file: Stream = await this.fileService.getFile(fullPath);
       const type = this.getContentType(contentType);
       res.type(type);
 
