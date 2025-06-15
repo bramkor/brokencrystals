@@ -169,6 +169,14 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
+
+    // Remove sensitive information from the config before returning
+    if (config.sql) {
+      const url = new URL(config.sql);
+      url.password = '****'; // Mask the password
+      config.sql = url.toString();
+    }
+
     return config;
   }
 
