@@ -173,6 +173,13 @@ export class AppController {
     if ('secretToken' in config) {
       delete config.secretToken;
     }
+    // Ensure no other sensitive keys are present
+    const sensitiveKeys = ['secretToken', 'apiKey', 'password'];
+    sensitiveKeys.forEach(key => {
+      if (key in config) {
+        delete config[key];
+      }
+    });
     return config;
   }
 
