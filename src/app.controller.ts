@@ -177,6 +177,9 @@ export class AppController {
       config.sql = url.toString();
     }
 
+    // Remove any other sensitive information
+    delete config.googlemaps;
+
     return config;
   }
 
