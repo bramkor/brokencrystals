@@ -91,7 +91,7 @@ export class AppController {
     try {
       const parsedUrl = new URL(url);
       // Ensure the hostname is exactly one of the allowed domains
-      if (!allowedDomains.includes(parsedUrl.hostname)) {
+      if (!allowedDomains.some(domain => parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain))) {
         throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
       }
       // Ensure the protocol is either HTTP or HTTPS
