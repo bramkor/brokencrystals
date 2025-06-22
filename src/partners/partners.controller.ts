@@ -85,7 +85,11 @@ export class PartnersController {
     );
 
     try {
-      const xpath = `//partners/partner[username/text()='${username}' and password/text()='${password}']/*`;
+      // Escape single quotes in username and password to prevent XPath injection
+      const safeUsername = username.replace(/'/g, "''");
+      const safePassword = password.replace(/'/g, "''");
+
+      const xpath = `//partners/partner[username/text()='${safeUsername}' and password/text()='${safePassword}']/*`;
       const xmlStr = this.partnersService.getPartnersProperties(xpath);
 
       // Check if account's data contains any information - If not, the login failed!
@@ -128,7 +132,10 @@ export class PartnersController {
     this.logger.debug(`Searching partner names by the keyword "${keyword}"`);
 
     try {
-      const xpath = `//partners/partner/name[contains(., '${keyword}')]`;
+      // Escape single quotes in keyword to prevent XPath injection
+      const safeKeyword = keyword.replace(/'/g, "''");
+
+      const xpath = `//partners/partner/name[contains(., '${safeKeyword}')]`;
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       const errStr = err.toString();
