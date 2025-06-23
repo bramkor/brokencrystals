@@ -1,3 +1,4 @@
+```
 import { test, before, after } from 'node:test';
 import { SecRunner } from '@bramkortooms/sectester-runner';
 import { Severity, AttackParamLocation, HttpMethod } from '@bramkortooms/sectester-scan';
@@ -33,3 +34,5 @@ test('GET /api/config', { signal: AbortSignal.timeout(timeout) }, async () => {
       auth: process.env.BRIGHT_AUTH_ID
     });
 });
+
+```
