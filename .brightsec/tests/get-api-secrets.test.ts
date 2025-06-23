@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/secrets', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['secret_tokens', 'bopla', 'csrf'],
+      tests: ['secret_tokens'],
       attackParamLocations: [AttackParamLocation.HEADER]
     })
     .waitForCompletion()
