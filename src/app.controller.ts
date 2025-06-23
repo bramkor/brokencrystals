@@ -100,6 +100,10 @@ export class AppController {
       if (parsedUrl.pathname !== '/' && parsedUrl.pathname !== '') {
         throw new HttpException('Invalid redirect URL path', HttpStatus.BAD_REQUEST);
       }
+      // Ensure the URL search params are empty to prevent open redirects
+      if (parsedUrl.search !== '') {
+        throw new HttpException('Invalid redirect URL parameters', HttpStatus.BAD_REQUEST);
+      }
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
