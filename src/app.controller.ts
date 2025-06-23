@@ -71,26 +71,10 @@ export class AppController {
   async renderTemplate(@Body() raw): Promise<string> {
     if (typeof raw === 'string' || Buffer.isBuffer(raw)) {
       const text = raw.toString().trim();
-      // Escape user input to prevent Server Side Template Injection
-      const escapedText = text.replace(/[&<>'"`]/g, (char) => {
-        switch (char) {
-          case '&':
-            return '&amp;';
-          case '<':
-            return '&lt;';
-          case '>':
-            return '&gt;';
-          case "'":
-            return '&#39;';
-          case '"':
-            return '&quot;';
-          case '`':
-            return '&#96;';
-          default:
-            return char;
-        }
-      });
-      const res = dotT.compile(escapedText)();
+      // Use a predefined template to prevent Server Side Template Injection
+      const template = "{{=it.content}}";
+      const compiled = dotT.template(template);
+      const res = compiled({ content: text });
       this.logger.debug(`Rendered template: ${res}`);
       return res;
     }
@@ -111,6 +95,10 @@ export class AppController {
       const parsedUrl = new URL(url);
       if (!allowedDomains.includes(parsedUrl.hostname)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+      }
+      // Ensure the URL path is empty to prevent open redirects
+      if (parsedUrl.pathname !== '/' && parsedUrl.pathname !== '') {
+        throw new HttpException('Invalid redirect URL path', HttpStatus.BAD_REQUEST);
       }
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);

@@ -85,8 +85,8 @@ export class PartnersController {
     );
 
     try {
-      const sanitizedUsername = username.replace(/'/g, "\'");
-      const sanitizedPassword = password.replace(/'/g, "\'");
+      const sanitizedUsername = this.sanitizeForXPath(username);
+      const sanitizedPassword = this.sanitizeForXPath(password);
       const xpath = `//partners/partner[username/text()='${sanitizedUsername}' and password/text()='${sanitizedPassword}']/*`;
       const xmlStr = this.partnersService.getPartnersProperties(xpath);
 
@@ -130,7 +130,7 @@ export class PartnersController {
     this.logger.debug(`Searching partner names by the keyword "${keyword}"`);
 
     try {
-      const sanitizedKeyword = keyword.replace(/'/g, "\'");
+      const sanitizedKeyword = this.sanitizeForXPath(keyword);
       const xpath = `//partners/partner/name[contains(., '${sanitizedKeyword}')]`;
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
@@ -146,5 +146,9 @@ export class PartnersController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  private sanitizeForXPath(input: string): string {
+    return input.replace(/'/g, "''");
   }
 }
