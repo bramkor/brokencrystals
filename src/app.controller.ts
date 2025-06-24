@@ -95,6 +95,10 @@ export class AppController {
       if (!isAllowed) {
         throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
       }
+      // Ensure the URL path is empty to prevent open redirects
+      if (parsedUrl.pathname !== '/' && parsedUrl.pathname !== '') {
+        throw new HttpException('Invalid URL path', HttpStatus.BAD_REQUEST);
+      }
       return { url };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
