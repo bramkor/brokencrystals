@@ -94,9 +94,9 @@ export class AppController {
       if (!allowedDomains.includes(hostname)) {
         throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
       }
-      // Ensure the URL path is empty to prevent open redirects with query parameters
-      if (urlObj.pathname !== '/' && urlObj.pathname !== '') {
-        throw new HttpException('Invalid URL path', HttpStatus.BAD_REQUEST);
+      // Ensure the URL path and search are empty to prevent open redirects with query parameters
+      if ((urlObj.pathname !== '/' && urlObj.pathname !== '') || urlObj.search) {
+        throw new HttpException('Invalid URL path or query', HttpStatus.BAD_REQUEST);
       }
       return { url: urlObj.origin }; // Redirect only to the origin to prevent query manipulation
     } catch (error) {
