@@ -90,7 +90,8 @@ export class AppController {
     const allowedDomains = ['google.com', 'example.com']; // Allowlist of domains
     try {
       const urlObj = new URL(url);
-      if (!allowedDomains.includes(urlObj.hostname)) {
+      const hostname = urlObj.hostname.replace(/^www\./, ''); // Normalize hostname by removing 'www.'
+      if (!allowedDomains.includes(hostname)) {
         throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
       }
       return { url };
