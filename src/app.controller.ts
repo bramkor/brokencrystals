@@ -90,7 +90,9 @@ export class AppController {
     const allowedDomains = ['google.com', 'example.com']; // Define allowed domains
     try {
       const parsedUrl = new URL(url);
-      if (!allowedDomains.includes(parsedUrl.hostname)) {
+      // Check if the hostname ends with one of the allowed domains
+      const isAllowed = allowedDomains.some(domain => parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain));
+      if (!isAllowed) {
         throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
       }
       return { url };
