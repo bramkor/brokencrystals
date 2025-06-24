@@ -88,10 +88,11 @@ export class AppController {
   @Redirect()
   async redirect(@Query('url') url: string) {
     const allowedUrls = ['https://example.com', 'https://another-allowed-site.com'];
-    if (!allowedUrls.includes(url)) {
+    const normalizedUrl = new URL(url);
+    if (!allowedUrls.includes(normalizedUrl.origin)) {
       throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
     }
-    return { url };
+    return { url: normalizedUrl.toString() };
   }
 
   @Post('metadata')
