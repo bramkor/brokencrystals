@@ -87,7 +87,16 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedUrls = ['https://example.com', 'https://another-allowed-site.com'];
+    try {
+      const normalizedUrl = new URL(url);
+      if (!allowedUrls.some(allowedUrl => normalizedUrl.origin === allowedUrl)) {
+        throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
+      }
+      return { url: normalizedUrl.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
