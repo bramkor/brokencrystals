@@ -87,7 +87,21 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedDomains = ['google.com', 'example.com']; // Allowlist of domains
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.replace(/^www\./, ''); // Normalize hostname by removing 'www.'
+      if (!allowedDomains.includes(hostname)) {
+        throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
+      }
+      // Ensure the URL path and search are empty to prevent open redirects with query parameters
+      if ((urlObj.pathname !== '/' && urlObj.pathname !== '') || urlObj.search) {
+        throw new HttpException('Invalid URL path or query', HttpStatus.BAD_REQUEST);
+      }
+      return { url: urlObj.origin }; // Redirect only to the origin to prevent query manipulation
+    } catch (error) {
+      throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
