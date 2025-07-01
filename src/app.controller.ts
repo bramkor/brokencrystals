@@ -98,7 +98,7 @@ export class AppController {
       if (parsedUrl.pathname !== '/' || parsedUrl.search !== '') {
         throw new HttpException('Invalid URL structure', HttpStatus.BAD_REQUEST);
       }
-      return { url: parsedUrl.toString() };
+      return { url: parsedUrl.origin }; // Only redirect to the origin
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
