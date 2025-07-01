@@ -94,6 +94,10 @@ export class AppController {
       if (!allowedDomains.some(domain => parsedUrl.hostname === domain)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
+      // Ensure the URL path is empty to prevent open redirects with query parameters
+      if (parsedUrl.pathname !== '/') {
+        throw new HttpException('Invalid redirect URL path', HttpStatus.BAD_REQUEST);
+      }
       return { url: parsedUrl.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
