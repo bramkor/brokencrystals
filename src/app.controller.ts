@@ -93,10 +93,6 @@ export class AppController {
       if (!allowedDomains.includes(parsedUrl.hostname)) {
         throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
       }
-      // Ensure the URL is exactly the allowed domain without any additional path or query
-      if (parsedUrl.pathname !== '/' || parsedUrl.search !== '') {
-        throw new HttpException('Invalid URL structure', HttpStatus.BAD_REQUEST);
-      }
       return { url: parsedUrl.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
