@@ -90,8 +90,13 @@ export class AppController {
     const allowedDomains = ['example.com', 'google.com']; // Define allowed domains
     try {
       const parsedUrl = new URL(url);
-      if (!allowedDomains.includes(parsedUrl.hostname)) {
+      // Check if the hostname is exactly one of the allowed domains
+      if (!allowedDomains.some(domain => parsedUrl.hostname === domain)) {
         throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
+      }
+      // Ensure the URL does not contain any path or query parameters
+      if (parsedUrl.pathname !== '/' || parsedUrl.search !== '') {
+        throw new HttpException('Invalid URL structure', HttpStatus.BAD_REQUEST);
       }
       return { url: parsedUrl.toString() };
     } catch (error) {
