@@ -95,7 +95,7 @@ export class AppController {
         throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
       }
       // Ensure the URL path is empty to prevent open redirects with query parameters
-      if (parsedUrl.pathname !== '/') {
+      if (parsedUrl.pathname !== '' && parsedUrl.pathname !== '/') {
         throw new HttpException('Invalid redirect path', HttpStatus.FORBIDDEN);
       }
       return { url: parsedUrl.toString() };
