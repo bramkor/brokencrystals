@@ -90,11 +90,10 @@ export class AppController {
     const allowedDomains = ['example.com', 'google.com']; // Define allowed domains
     try {
       const parsedUrl = new URL(url);
-      // Check if the hostname is exactly in the allowed list and path is empty
-      if (!allowedDomains.includes(parsedUrl.hostname) || parsedUrl.search !== '') {
-        throw new HttpException('Forbidden domain or query parameters', HttpStatus.FORBIDDEN);
+      if (!allowedDomains.includes(parsedUrl.hostname)) {
+        throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
       }
-      return { url: parsedUrl.origin }; // Redirect only to the origin
+      return { url: parsedUrl.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
     }
