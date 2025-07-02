@@ -91,7 +91,7 @@ export class AppController {
     try {
       const parsedUrl = new URL(url);
       // Ensure the URL is exactly the allowed domain without any path or query
-      if (!allowedDomains.includes(parsedUrl.hostname) || parsedUrl.pathname !== '/' || parsedUrl.searchParams.toString() !== '') {
+      if (!allowedDomains.includes(parsedUrl.hostname) || parsedUrl.pathname !== '' || parsedUrl.searchParams.toString() !== '') {
         throw new HttpException('Forbidden URL', HttpStatus.FORBIDDEN);
       }
       return { url: parsedUrl.toString() };
