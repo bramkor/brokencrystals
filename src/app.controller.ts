@@ -93,10 +93,6 @@ export class AppController {
       if (!allowedDomains.includes(parsedUrl.hostname)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
-      // Ensure the URL is not just a domain with a query string that could be used for phishing
-      if (parsedUrl.searchParams.toString() !== '') {
-        throw new HttpException('Redirect URL should not contain query parameters', HttpStatus.BAD_REQUEST);
-      }
       return { url: parsedUrl.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
