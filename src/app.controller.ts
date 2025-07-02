@@ -91,8 +91,8 @@ export class AppController {
     try {
       const parsedUrl = new URL(url);
       // Check if the hostname is exactly in the allowed list and path is empty
-      if (!allowedDomains.includes(parsedUrl.hostname) || parsedUrl.pathname !== '/') {
-        throw new HttpException('Forbidden domain or path', HttpStatus.FORBIDDEN);
+      if (!allowedDomains.includes(parsedUrl.hostname) || parsedUrl.search !== '') {
+        throw new HttpException('Forbidden domain or query parameters', HttpStatus.FORBIDDEN);
       }
       return { url: parsedUrl.origin }; // Redirect only to the origin
     } catch (error) {
