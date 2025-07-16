@@ -13,6 +13,11 @@ export class FileService {
   async getFile(file: string): Promise<Stream> {
     this.logger.log(`Reading file: ${file}`);
 
+    // Validate and sanitize the file path
+    if (!this.isValidPath(file)) {
+      throw new Error('Invalid file path');
+    }
+
     if (file.startsWith('/')) {
       await fs.promises.access(file, R_OK);
 
@@ -44,5 +49,11 @@ export class FileService {
       await fs.promises.unlink(file);
       return true;
     }
+  }
+
+  private isValidPath(filePath: string): boolean {
+    // Prevent directory traversal attacks
+    const resolvedPath = path.resolve(filePath);
+    return resolvedPath.startsWith(process.cwd());
   }
 }
