@@ -16,9 +16,21 @@ export class AppResolver {
   async getCommandResult(@Args('command') command: string): Promise<string> {
     this.logger.debug(`launch ${command} command`);
     try {
+      // Validate and sanitize the command input
+      if (!this.isValidCommand(command)) {
+        throw new InternalServerErrorException('Invalid command input');
+      }
       return await this.appService.launchCommand(command);
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
+  }
+
+  private isValidCommand(command: string): boolean {
+    // Implement a simple validation logic
+    // For example, only allow certain commands or patterns
+    const allowedCommands = ['ls', 'echo']; // Example of allowed commands
+    const commandParts = command.split(' ');
+    return allowedCommands.includes(commandParts[0]);
   }
 }

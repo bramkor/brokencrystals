@@ -87,7 +87,24 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedHosts = ['example.com', 'another-allowed-domain.com'];
+    try {
+      const urlObj = new URL(url);
+      if (!allowedHosts.includes(urlObj.hostname)) {
+        throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+      }
+      // Ensure the URL is HTTPS
+      if (urlObj.protocol !== 'https:') {
+        throw new HttpException('Only HTTPS URLs are allowed', HttpStatus.BAD_REQUEST);
+      }
+      // Ensure the path is not empty
+      if (!urlObj.pathname || urlObj.pathname === '/') {
+        throw new HttpException('URL path cannot be empty', HttpStatus.BAD_REQUEST);
+      }
+      return { url: urlObj.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
