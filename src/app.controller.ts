@@ -94,7 +94,7 @@ export class AppController {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
       // Ensure the URL is properly formatted and safe
-      return { url: urlObj.origin + urlObj.pathname };
+      return { url: urlObj.origin };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
