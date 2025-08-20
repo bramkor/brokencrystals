@@ -87,7 +87,16 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedDomains = ['example.com', 'another-allowed-domain.com'];
+    try {
+      const urlObj = new URL(url);
+      if (!allowedDomains.includes(urlObj.hostname)) {
+        throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+      }
+      return { url };
+    } catch (error) {
+      throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
@@ -255,7 +264,7 @@ export class AppController {
       }
     }
   })
-  async getUserInfoV2(@Param('email') email: string): Promise<UserDto> {
+  async getUserInfoV2(@Param('email') email: Promise<UserDto> {
     try {
       return await this.appService.getUserInfo(email);
     } catch (err) {
