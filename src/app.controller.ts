@@ -93,6 +93,9 @@ export class AppController {
       if (!allowedHosts.includes(urlObj.hostname)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
+      if (urlObj.protocol !== 'https:') {
+        throw new HttpException('Only HTTPS protocol is allowed', HttpStatus.BAD_REQUEST);
+      }
       return { url };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
