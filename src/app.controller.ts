@@ -87,7 +87,16 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedHosts = ['trusted.com', 'another-trusted.com'];
+    try {
+      const urlObj = new URL(url);
+      if (!allowedHosts.includes(urlObj.hostname)) {
+        throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+      }
+      return { url: urlObj.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
