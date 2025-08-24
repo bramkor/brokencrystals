@@ -47,7 +47,12 @@ export class FileService {
       'metadata.google.internal',
       '169.254.169.254'
     ];
-    return allowedHostnames.includes(url.hostname);
+    // Fix: Ensure the URL is not a private IP address
+    const privateIpRegex = /^(127\.0\.0\.1|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.)/;
+    if (privateIpRegex.test(url.hostname) || !allowedHostnames.includes(url.hostname)) {
+      return false;
+    }
+    return true;
   }
 
   async deleteFile(file: string): Promise<boolean> {
