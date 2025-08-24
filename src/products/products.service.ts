@@ -45,7 +45,7 @@ export class ProductsService {
   async findLatest(limit: number): Promise<Product[]> {
     this.logger.debug(`Find ${limit} latest products`);
     const maxLimit = 50; // Set a maximum limit to prevent excessive data retrieval
-    const effectiveLimit = Math.min(limit, maxLimit);
+    const effectiveLimit = Math.min(limit || 3, maxLimit); // Ensure a default limit is applied
     if (limit > maxLimit) {
       this.logger.warn(`Requested limit ${limit} exceeds maximum limit of ${maxLimit}. Using max limit of ${effectiveLimit}.`);
     }
