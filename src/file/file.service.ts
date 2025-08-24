@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CloudProvidersMetaData } from './cloud.providers.metadata';
 import { R_OK } from 'constants';
+import { URL } from 'url';
 
 @Injectable()
 export class FileService {
@@ -13,11 +14,27 @@ export class FileService {
   async getFile(file: string): Promise<Stream> {
     this.logger.log(`Reading file: ${file}`);
 
+    // Validate the file path to prevent directory traversal
+    if (!this.isValidPath(file)) {
+      throw new Error('Invalid file path');
+    }
+
     if (file.startsWith('/')) {
       await fs.promises.access(file, R_OK);
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      // Validate URL
+      const url = new URL(file);
+      if (!this.isAllowedHost(url.hostname)) {
+        throw new Error(`Access to the host '${url.hostname}' is not allowed`);
+      }
+
+      // Ensure the path is within the allowed metadata paths
+      if (!this.isAllowedPath(url.pathname, url.hostname)) {
+        throw new Error(`Access to the path '${url.pathname}' is not allowed`);
+      }
+
       const content = await this.cloudProviders.get(file);
 
       if (content) {
@@ -32,6 +49,33 @@ export class FileService {
 
       return fs.createReadStream(file);
     }
+  }
+
+  private isAllowedHost(hostname: string): boolean {
+    const allowedHosts = [
+      'metadata.google.internal',
+      // Removed '169.254.169.254' to prevent SSRF
+    ];
+    return allowedHosts.includes(hostname);
+  }
+
+  private isAllowedPath(pathname: string, hostname: string): boolean {
+    const allowedPaths = {
+      'metadata.google.internal': [
+        '/computeMetadata/v1/instance/',
+        '/computeMetadata/v1/oslogin/',
+        '/computeMetadata/v1/project/'
+      ],
+      // Add other hosts and their allowed paths if needed
+    };
+    return allowedPaths[hostname]?.some(allowedPath => pathname.startsWith(allowedPath)) || false;
+  }
+
+  private isValidPath(filePath: string): boolean {
+    // Prevent directory traversal by ensuring the resolved path is within a specific directory
+    const baseDir = path.resolve(process.cwd(), 'allowed_directory');
+    const resolvedPath = path.resolve(baseDir, filePath);
+    return resolvedPath.startsWith(baseDir);
   }
 
   async deleteFile(file: string): Promise<boolean> {
