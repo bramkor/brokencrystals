@@ -46,6 +46,10 @@ export class PartnersController {
     this.logger.debug(`Getting partners with xpath expression "${xpath}"`);
 
     try {
+      // Validate and sanitize the xpath input
+      if (!this.isValidXpath(xpath)) {
+        throw new HttpException('Invalid XPath expression', HttpStatus.BAD_REQUEST);
+      }
       return this.partnersService.getPartnersProperties(xpath);
     } catch (err) {
       throw new HttpException(
@@ -143,5 +147,16 @@ export class PartnersController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
+  }
+
+  private isValidXpath(xpath: string): boolean {
+    // Basic validation logic for XPath
+    // This should be replaced with a more robust validation logic
+    const forbiddenPatterns = [
+      /\|/, // disallow union
+      /\[\s*\]/, // disallow empty predicates
+      /\btext\(\)\b/ // disallow text() function
+    ];
+    return !forbiddenPatterns.some(pattern => pattern.test(xpath));
   }
 }
