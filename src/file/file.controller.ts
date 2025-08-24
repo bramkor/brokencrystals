@@ -86,11 +86,16 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.fileService.getFile(path);
-    const type = this.getContentType(contentType);
-    res.type(type);
+    try {
+      const file: Stream = await this.fileService.getFile(path);
+      const type = this.getContentType(contentType);
+      res.type(type);
 
-    return file;
+      return file;
+    } catch (err) {
+      this.logger.error(err.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'An error occurred while reading the file' });
+    }
   }
 
   @Get('/google')
@@ -266,8 +271,14 @@ export class FileController {
   @ApiOkResponse({
     description: 'File deleted successfully'
   })
-  async deleteFile(@Query('path') path: string): Promise<void> {
-    await this.fileService.deleteFile(path);
+  async deleteFile(@Query('path') path: string, @Res() res: FastifyReply): Promise<void> {
+    try {
+      await this.fileService.deleteFile(path);
+      res.status(HttpStatus.OK).send({ message: 'File deleted successfully' });
+    } catch (err) {
+      this.logger.error(err.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'An error occurred while deleting the file' });
+    }
   }
 
   @Put('raw')
@@ -292,7 +303,7 @@ export class FileController {
       }
     } catch (err) {
       this.logger.error(err.message);
-      throw err.message;
+      throw new Error('An error occurred while uploading the file');
     }
   }
 
@@ -322,7 +333,7 @@ export class FileController {
       return stream;
     } catch (err) {
       this.logger.error(err.message);
-      res.status(HttpStatus.NOT_FOUND);
+      res.status(HttpStatus.NOT_FOUND).send({ error: 'File not found' });
     }
   }
 }
