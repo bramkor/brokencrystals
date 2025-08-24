@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CloudProvidersMetaData } from './cloud.providers.metadata';
 import { R_OK } from 'constants';
+import { URL } from 'url';
 
 @Injectable()
 export class FileService {
@@ -18,6 +19,12 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      // Validate URL
+      const url = new URL(file);
+      if (!this.isValidUrl(url)) {
+        throw new Error('Invalid URL or not allowed');
+      }
+
       const content = await this.cloudProviders.get(file);
 
       if (content) {
@@ -32,6 +39,20 @@ export class FileService {
 
       return fs.createReadStream(file);
     }
+  }
+
+  private isValidUrl(url: URL): boolean {
+    // Allow only specific hostnames
+    const allowedHostnames = [
+      'metadata.google.internal',
+      '169.254.169.254'
+    ];
+    // Fix: Ensure the URL is not a private IP address
+    const privateIpRegex = /^(127\.0\.0\.1|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.)/;
+    if (privateIpRegex.test(url.hostname) || !allowedHostnames.includes(url.hostname)) {
+      return false;
+    }
+    return true;
   }
 
   async deleteFile(file: string): Promise<boolean> {
