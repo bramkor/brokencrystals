@@ -122,6 +122,10 @@ export class AuthService {
   }
 
   validateToken(token: string, processor: JwtProcessorType): Promise<unknown> {
+    const header = JSON.parse(Buffer.from(token.split('.')[0], 'base64').toString());
+    if (header.alg === 'none') {
+      throw new Error('None algorithm is not allowed');
+    }
     return this.processors.get(processor).validateToken(token);
   }
 
