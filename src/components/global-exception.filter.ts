@@ -24,7 +24,7 @@ export class GlobalExceptionFilter extends BaseExceptionFilter {
       const sanitizedResponse =
         typeof response === 'string'
           ? { error: response }
-          : { ...response, message: 'An error occurred' };
+          : { ...response, message: 'An error occurred', line: undefined };
 
       const applicationRef =
         this.applicationRef ||
