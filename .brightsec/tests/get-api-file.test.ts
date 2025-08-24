@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/file', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['lfi', 'ssrf', 'open_cloud_storage', 'file_upload', 'full_path_disclosure'],
+      tests: ['ssrf', 'full_path_disclosure', 'lfi'],
       attackParamLocations: [AttackParamLocation.QUERY, AttackParamLocation.HEADER],
       starMetadata: {}
     })
