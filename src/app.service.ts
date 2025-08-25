@@ -67,10 +67,9 @@ export class AppService {
       awsBucket: this.configService.get<string>(
         AppModuleConfigProperties.ENV_AWS_BUCKET
       ),
-      sql: `postgres://${dbUser}:${dbPwd}@${dbHost}:${dbPort}/${dbSchema} `,
-      googlemaps: this.configService.get<string>(
-        AppModuleConfigProperties.ENV_GOOGLE_MAPS
-      )
+      // Remove sensitive information from the response
+      sql: `postgres://<REDACTED>:<REDACTED>@${dbHost}:${dbPort}/${dbSchema}`,
+      googlemaps: '<REDACTED>'
     };
   }
 
@@ -81,5 +80,21 @@ export class AppService {
     } catch (err) {
       throw new HttpException(err.message, err.status);
     }
+  }
+
+  getSecrets(): Record<string, string> {
+    this.logger.debug('Called getSecrets');
+    return {
+      codeclimate: '<REDACTED>',
+      facebook: '<REDACTED>',
+      google_b64: '<REDACTED>',
+      google_oauth: '<REDACTED>',
+      google_oauth_token: '<REDACTED>',
+      heroku: '<REDACTED>',
+      hockey_app: '<REDACTED>',
+      outlook: '<REDACTED>',
+      paypal: '<REDACTED>',
+      slack: '<REDACTED>'
+    };
   }
 }

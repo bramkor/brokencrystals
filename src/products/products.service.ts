@@ -3,7 +3,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import {
   Injectable,
   InternalServerErrorException,
-  Logger
+  Logger,
+  BadRequestException
 } from '@nestjs/common';
 import { Product } from '../model/product.entity';
 
@@ -44,19 +45,26 @@ export class ProductsService {
 
   async findLatest(limit: number): Promise<Product[]> {
     this.logger.debug(`Find ${limit} latest products`);
+    const maxLimit = 50; // Set a maximum limit to prevent excessive data retrieval
+    if (!limit || limit < 1 || limit > maxLimit) {
+      throw new BadRequestException(`Limit must be between 1 and ${maxLimit}`);
+    }
     return this.productsRepository.find(
       {},
       { limit, orderBy: { createdAt: 'desc' } }
     );
   }
 
-  async updateProduct(query: string): Promise<void> {
+  async updateProduct(productName: string): Promise<void> {
     try {
-      this.logger.debug(`Updating products table with query "${query}"`);
-      await this.em.getConnection().execute(query);
+      this.logger.debug(`Updating product views for product name: "${productName}"`);
+      await this.em.getConnection().execute(
+        'UPDATE product SET views_count = views_count + 1 WHERE name = ?',
+        [productName]
+      );
       return;
     } catch (err) {
-      this.logger.warn(`Failed to execute query. Error: ${err.message}`);
+      this.logger.warn(`Failed to update product views. Error: ${err.message}`);
       throw new InternalServerErrorException(err.message);
     }
   }
