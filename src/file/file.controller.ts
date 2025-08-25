@@ -266,8 +266,14 @@ export class FileController {
   @ApiOkResponse({
     description: 'File deleted successfully'
   })
-  async deleteFile(@Query('path') path: string): Promise<void> {
-    await this.fileService.deleteFile(path);
+  async deleteFile(@Query('path') path: string, @Res() res: FastifyReply): Promise<void> {
+    try {
+      await this.fileService.deleteFile(path);
+      res.status(HttpStatus.OK).send({ message: 'File deleted successfully' });
+    } catch (err) {
+      this.logger.error(err.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'An error occurred while deleting the file' });
+    }
   }
 
   @Put('raw')
