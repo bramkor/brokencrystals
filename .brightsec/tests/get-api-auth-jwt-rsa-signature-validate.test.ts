@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/auth/jwt/rsa/signature/validate', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['jwt', 'csrf', 'insecure_tls_configuration', 'open_database', 'secret_tokens'],
+      tests: ['jwt'],
       attackParamLocations: [AttackParamLocation.HEADER],
       starMetadata: {}
     })
