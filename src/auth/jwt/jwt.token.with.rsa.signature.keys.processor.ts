@@ -19,6 +19,7 @@ export class JwtTokenWithRSASignatureKeysProcessor extends JwtTokenProcessor {
       throw new Error('Invalid token algorithm');
     }
 
+    // Validate the token using the public key and RS256 algorithm
     return decode(token, this.publicKey, true, 'RS256');
   }
 
