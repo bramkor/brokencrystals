@@ -99,7 +99,8 @@ export class AppController {
       if (urlObj.protocol !== 'https:') {
         throw new HttpException('Insecure URL protocol', HttpStatus.BAD_REQUEST);
       }
-      return { url: urlObj.toString() };
+      // Fix: Return a safe URL
+      return { url: `${urlObj.protocol}//${urlObj.hostname}${urlObj.pathname}` };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
