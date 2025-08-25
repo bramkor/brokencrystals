@@ -41,8 +41,7 @@ export class FileService {
 
   private isAllowedHost(hostname: string): boolean {
     const allowedHosts = [
-      'metadata.google.internal',
-      '169.254.169.254'
+      // Add only trusted external hosts here
     ];
     // Ensure the hostname is not an IP address or a private network address
     const privateNetworkRegex = /^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.|127\.|169\.254\.|::1|fc00:|fe80:|fd00:)/;
