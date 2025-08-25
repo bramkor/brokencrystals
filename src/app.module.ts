@@ -35,8 +35,21 @@ import { ChatModule } from './chat/chat.module';
     HttpClientModule,
     GraphQLModule.forRoot<MercuriusDriverConfig>({
       driver: MercuriusDriver,
-      graphiql: true,
-      autoSchemaFile: true
+      graphiql: false, // Disable GraphiQL
+      autoSchemaFile: true,
+      introspection: false, // Disable introspection
+      context: ({ request }) => ({
+        headers: request.headers
+      }),
+      validationRules: [
+        (context) => ({
+          Field(node) {
+            if (node.name.value.startsWith('__')) {
+              context.reportError(new Error('Introspection is disabled'));
+            }
+          }
+        })
+      ]
     }),
     PartnersModule,
     EmailModule,

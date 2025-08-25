@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CloudProvidersMetaData } from './cloud.providers.metadata';
 import { R_OK } from 'constants';
+import { URL } from 'url';
 
 @Injectable()
 export class FileService {
@@ -18,6 +19,10 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      const url = new URL(file);
+      if (!this.isAllowedHost(url.hostname)) {
+        throw new Error('Access to the specified host is not allowed');
+      }
       const content = await this.cloudProviders.get(file);
 
       if (content) {
@@ -32,6 +37,24 @@ export class FileService {
 
       return fs.createReadStream(file);
     }
+  }
+
+  private isAllowedHost(hostname: string): boolean {
+    const allowedHosts = [
+      // Add only trusted external hosts here
+    ];
+    // Ensure the hostname is not an IP address or a private network address
+    const privateNetworkRegex = /^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.|127\.|169\.254\.|::1|fc00:|fe80:|fd00:)/;
+    if (privateNetworkRegex.test(hostname) || this.isIpAddress(hostname)) {
+      return false;
+    }
+    return allowedHosts.includes(hostname);
+  }
+
+  private isIpAddress(hostname: string): boolean {
+    // Check if the hostname is an IP address
+    const ipRegex = /^\d{1,3}(\.\d{1,3}){3}$/;
+    return ipRegex.test(hostname);
   }
 
   async deleteFile(file: string): Promise<boolean> {
