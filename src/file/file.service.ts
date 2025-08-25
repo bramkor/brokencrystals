@@ -49,6 +49,7 @@ export class FileService {
   private isAllowedHost(hostname: string): boolean {
     const allowedHosts = [
       'metadata.google.internal',
+      '169.254.169.254', // Added for AWS, Azure, and Digital Ocean
       // Add other allowed hosts here
     ];
     return allowedHosts.includes(hostname);
@@ -58,6 +59,13 @@ export class FileService {
     const allowedPaths = {
       'metadata.google.internal': [
         '/computeMetadata/v1/instance',
+        // Add other allowed paths for this host
+      ],
+      '169.254.169.254': [
+        '/latest/meta-data/', // AWS
+        '/metadata/instance', // Azure
+        '/metadata/v1', // Digital Ocean
+        '/metadata/v1.json', // Digital Ocean JSON
         // Add other allowed paths for this host
       ],
       // Define allowed paths for other hosts if needed
