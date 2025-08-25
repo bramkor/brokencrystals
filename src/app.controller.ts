@@ -95,7 +95,11 @@ export class AppController {
       if (!allowedHosts.includes(urlObj.hostname)) {
         throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
       }
-      return { url };
+      // Fix: Ensure the URL is safe by checking the protocol
+      if (urlObj.protocol !== 'https:') {
+        throw new HttpException('Insecure URL protocol', HttpStatus.BAD_REQUEST);
+      }
+      return { url: urlObj.toString() };
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
