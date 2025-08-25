@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CloudProvidersMetaData } from './cloud.providers.metadata';
 import { R_OK } from 'constants';
+import { URL } from 'url';
 
 @Injectable()
 export class FileService {
@@ -18,6 +19,11 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      // Validate the URL against known cloud provider metadata URLs
+      if (!this.isValidCloudProviderUrl(file)) {
+        throw new Error('Invalid URL for cloud provider metadata');
+      }
+
       const content = await this.cloudProviders.get(file);
 
       if (content) {
@@ -31,6 +37,22 @@ export class FileService {
       await fs.promises.access(file, R_OK);
 
       return fs.createReadStream(file);
+    }
+  }
+
+  private isValidCloudProviderUrl(url: string): boolean {
+    try {
+      const parsedUrl = new URL(url);
+      return (
+        (parsedUrl.hostname === 'metadata.google.internal' && url.startsWith(CloudProvidersMetaData.GOOGLE)) ||
+        (parsedUrl.hostname === '169.254.169.254' &&
+          (url.startsWith(CloudProvidersMetaData.AWS) ||
+            url.startsWith(CloudProvidersMetaData.AZURE) ||
+            url.startsWith(CloudProvidersMetaData.DIGITAL_OCEAN)))
+      );
+    } catch (error) {
+      this.logger.error('Invalid URL format', error);
+      return false;
     }
   }
 
