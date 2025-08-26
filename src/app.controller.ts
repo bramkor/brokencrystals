@@ -71,9 +71,8 @@ export class AppController {
   async renderTemplate(@Body() raw): Promise<string> {
     if (typeof raw === 'string' || Buffer.isBuffer(raw)) {
       const text = raw.toString().trim();
-      // Fix: Escape user input before compiling the template
-      const escapedText = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-      const res = dotT.compile(escapedText)();
+      // Fix: Use a safe template rendering approach
+      const res = dotT.template(text, { evaluate: false, interpolate: false, encode: false })();
       this.logger.debug(`Rendered template: ${res}`);
       return res;
     }
@@ -98,7 +97,7 @@ export class AppController {
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
-    return { url };
+    return { url: urlObj.toString() };
   }
 
   @Post('metadata')
