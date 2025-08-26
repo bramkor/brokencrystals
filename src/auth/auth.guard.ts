@@ -37,7 +37,7 @@ export class AuthGuard implements CanActivate {
       this.logger.debug(`Failed to validate token: ${err.message}`);
       throw new UnauthorizedException({
         error: 'Unauthorized',
-        line: __filename
+        // Removed line information to prevent full path disclosure
       });
     }
   }
@@ -71,13 +71,14 @@ export class AuthGuard implements CanActivate {
       context.getHandler()
     );
 
+    if (!processorType) {
+      throw new UnauthorizedException('Invalid token processor type');
+    }
+
     try {
       return !!(await this.authService.validateToken(token, processorType));
     } catch {
-      return !!(await this.authService.validateToken(
-        token,
-        JwtProcessorType.BEARER
-      ));
+      return false;
     }
   }
 
