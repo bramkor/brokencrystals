@@ -72,10 +72,9 @@ export class AppService {
       awsBucket: this.configService.get<string>(
         AppModuleConfigProperties.ENV_AWS_BUCKET
       ),
-      sql: `postgres://<REDACTED>:<REDACTED>@${dbHost}:${dbPort}/${dbSchema}`,
-      googlemaps: this.configService.get<string>(
-        AppModuleConfigProperties.ENV_GOOGLE_MAPS
-      )
+      // Do not expose sensitive information
+      sql: 'Sensitive information is hidden',
+      googlemaps: 'Sensitive information is hidden'
     };
   }
 
