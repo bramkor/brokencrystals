@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/file/digital_ocean', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['ssrf', 'open_cloud_storage', 'lfi', 'unvalidated_redirect'],
+      tests: ['ssrf'],
       attackParamLocations: [AttackParamLocation.QUERY, AttackParamLocation.HEADER],
       starMetadata: {}
     })

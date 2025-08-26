@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/config', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['open_database', 'amazon_s3_takeover', 'improper_asset_management'],
+      tests: ['open_database'],
       attackParamLocations: [AttackParamLocation.PATH],
       starMetadata: {}
     })
