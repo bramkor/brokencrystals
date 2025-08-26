@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { URL } from 'url';
 
 @Injectable()
 export class CloudProvidersMetaData {
@@ -252,20 +253,39 @@ export class CloudProvidersMetaData {
   }
 
   async get(providerUrl: string): Promise<string> {
-    if (providerUrl.startsWith(CloudProvidersMetaData.GOOGLE)) {
-      return this.providers.get(CloudProvidersMetaData.GOOGLE);
-    } else if (providerUrl.startsWith(CloudProvidersMetaData.DIGITAL_OCEAN)) {
-      return this.providers.get(CloudProvidersMetaData.DIGITAL_OCEAN);
-    } else if (providerUrl.startsWith(CloudProvidersMetaData.AWS)) {
-      return this.providers.get(CloudProvidersMetaData.AWS);
-    } else if (providerUrl.startsWith(CloudProvidersMetaData.AZURE)) {
-      return this.providers.get(CloudProvidersMetaData.AZURE);
-    } else {
-      const { data } = await axios(providerUrl, {
-        timeout: 5000,
-        responseType: 'text'
-      });
-      return data;
+    const url = new URL(providerUrl);
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      throw new Error('Invalid URL protocol');
     }
+
+    // Validate the URL against known cloud provider metadata URLs
+    if (
+      !providerUrl.startsWith(CloudProvidersMetaData.GOOGLE) &&
+      !providerUrl.startsWith(CloudProvidersMetaData.DIGITAL_OCEAN) &&
+      !providerUrl.startsWith(CloudProvidersMetaData.AWS) &&
+      !providerUrl.startsWith(CloudProvidersMetaData.AZURE)
+    ) {
+      throw new Error('Access to the specified URL is not allowed');
+    }
+
+    // Ensure the path is within the allowed metadata paths
+    const baseUrl = providerUrl.split('?')[0];
+    const allowedPaths = this.providers.get(baseUrl);
+    if (!allowedPaths || !providerUrl.startsWith(baseUrl)) {
+      throw new Error('Access to the specified path is not allowed');
+    }
+
+    // Check if the path is allowed
+    const path = url.pathname;
+    if (!allowedPaths.split('\n').some(allowedPath => path.startsWith(allowedPath.trim()))) {
+      throw new Error('Access to the specified path is not allowed');
+    }
+
+    const { data } = await axios(providerUrl, {
+      timeout: 5000,
+      responseType: 'text',
+      headers: { 'Metadata-Flavor': 'Google' } // Ensure the request is valid for Google metadata
+    });
+    return data;
   }
 }
