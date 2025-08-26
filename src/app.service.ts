@@ -6,7 +6,6 @@ import { AppModuleConfigProperties } from './app.module.config.properties';
 import { OrmModuleConfigProperties } from './orm/orm.module.config.properties';
 import { AppConfig } from './app.config.api';
 import { UserDto } from './users/api/UserDto';
-import * as DOMPurify from 'dompurify';
 import { parseXml } from 'libxmljs';
 
 @Injectable()
@@ -69,10 +68,8 @@ export class AppService {
       awsBucket: this.configService.get<string>(
         AppModuleConfigProperties.ENV_AWS_BUCKET
       ),
-      sql: `postgres://${dbUser}:${dbPwd}@${dbHost}:${dbPort}/${dbSchema}`,
-      googlemaps: this.configService.get<string>(
-        AppModuleConfigProperties.ENV_GOOGLE_MAPS
-      )
+      sql: `postgres://<REDACTED>:<REDACTED>@${dbHost}:${dbPort}/${dbSchema}`,
+      googlemaps: '<REDACTED>'
     };
   }
 
