@@ -1,0 +1,36 @@
+import { test, before, after } from 'node:test';
+import { SecRunner } from '@sectester/runner';
+import { AttackParamLocation, HttpMethod } from '@sectester/scan';
+
+const timeout = 40 * 60 * 1000;
+const baseUrl = process.env.BRIGHT_TARGET_URL!;
+
+let runner!: SecRunner;
+
+before(async () => {
+  runner = new SecRunner({
+    hostname: process.env.BRIGHT_HOSTNAME!,
+    projectId: process.env.BRIGHT_PROJECT_ID!
+  });
+
+  await runner.init();
+});
+
+after(() => runner.clear());
+
+test('GET /api/file/aws', { signal: AbortSignal.timeout(timeout) }, async () => {
+  await runner
+    .createScan({
+      tests: ['amazon_s3_takeover', 'ssrf', 'lfi', 'open_cloud_storage', 'secret_tokens'],
+      attackParamLocations: [AttackParamLocation.QUERY, AttackParamLocation.HEADER],
+      starMetadata: {}
+    })
+    .setFailFast(false)
+    .timeout(timeout)
+    .run({
+      method: HttpMethod.GET,
+      url: `${baseUrl}/api/file/aws?path=config/products/crystals/amethyst.jpg&type=image/jpg`,
+      headers: { accept: 'image/jpg' },
+      auth: process.env.BRIGHT_AUTH_ID
+    });
+});
