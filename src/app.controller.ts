@@ -124,12 +124,9 @@ export class AppController {
   })
   @Header('content-type', 'text/xml')
   async xml(@Body() xml: string): Promise<string> {
-    const sanitizedXml = this.appService.sanitizeXmlInput(xml);
-    const xmlDoc = parseXml(decodeURIComponent(sanitizedXml), {
-      noent: false, // Disable entity substitution
-      dtdload: false, // Disable DTD loading
-      dtdattr: false, // Disable default DTD attributes
-      doctype: false, // Disable doctype declaration
+    const xmlDoc = parseXml(decodeURIComponent(xml), {
+      noent: true,
+      dtdvalid: true,
       recover: true
     });
     this.logger.debug(xmlDoc);

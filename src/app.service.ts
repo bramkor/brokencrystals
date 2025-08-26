@@ -91,6 +91,8 @@ export class AppService {
       doctype: false, // Disable doctype declaration
       recover: true
     });
-    return xmlDoc.toString();
+    // Additional fix: Remove script tags to prevent XSS
+    const sanitizedContent = xmlDoc.toString().replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, '');
+    return sanitizedContent;
   }
 }
