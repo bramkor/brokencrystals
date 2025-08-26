@@ -6,6 +6,7 @@ import { AppModuleConfigProperties } from './app.module.config.properties';
 import { OrmModuleConfigProperties } from './orm/orm.module.config.properties';
 import { AppConfig } from './app.config.api';
 import { UserDto } from './users/api/UserDto';
+import { parseXml } from 'libxmljs';
 
 @Injectable()
 export class AppService {
@@ -67,10 +68,8 @@ export class AppService {
       awsBucket: this.configService.get<string>(
         AppModuleConfigProperties.ENV_AWS_BUCKET
       ),
-      sql: `postgres://${dbUser}:${dbPwd}@${dbHost}:${dbPort}/${dbSchema} `,
-      googlemaps: this.configService.get<string>(
-        AppModuleConfigProperties.ENV_GOOGLE_MAPS
-      )
+      sql: `postgres://<REDACTED>:<REDACTED>@${dbHost}:${dbPort}/${dbSchema}`,
+      googlemaps: '<REDACTED>'
     };
   }
 
@@ -81,5 +80,19 @@ export class AppService {
     } catch (err) {
       throw new HttpException(err.message, err.status);
     }
+  }
+
+  sanitizeXmlInput(xml: string): string {
+    // Fix: Disable external entity parsing to prevent XXE
+    const xmlDoc = parseXml(xml, {
+      noent: false, // Disable entity substitution
+      dtdload: false, // Disable DTD loading
+      dtdattr: false, // Disable default DTD attributes
+      doctype: false, // Disable doctype declaration
+      recover: true
+    });
+    // Additional fix: Remove script tags to prevent XSS
+    const sanitizedContent = xmlDoc.toString().replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, '');
+    return sanitizedContent;
   }
 }
