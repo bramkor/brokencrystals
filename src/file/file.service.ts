@@ -17,22 +17,16 @@ export class FileService {
   ];
 
   private readonly allowedHosts = [
-    'metadata.google.internal',
-    // Add other allowed hosts here
+    // Add allowed hosts here
   ];
 
   async getFile(file: string): Promise<Stream> {
     this.logger.log(`Reading file: ${file}`);
 
-    if (!this.isAllowedPath(file) && !this.isAllowedHost(new URL(file).hostname)) {
-      throw new Error('Access to this file path or host is not allowed');
-    }
+    // Normalize the path to prevent directory traversal
+    const normalizedPath = path.normalize(file);
 
-    if (file.startsWith('/')) {
-      await fs.promises.access(file, R_OK);
-
-      return fs.createReadStream(file);
-    } else if (file.startsWith('http')) {
+    if (file.startsWith('http')) {
       // Validate URL
       const url = new URL(file);
       if (!this.isAllowedHost(url.hostname)) {
@@ -47,20 +41,26 @@ export class FileService {
         throw new Error(`no such file or directory, access '${file}'`);
       }
     } else {
-      file = path.resolve(process.cwd(), file);
+      const resolvedPath = path.resolve(process.cwd(), normalizedPath);
 
-      await fs.promises.access(file, R_OK);
+      if (!this.isAllowedPath(resolvedPath)) {
+        throw new Error('Access to this file path is not allowed');
+      }
 
-      return fs.createReadStream(file);
+      await fs.promises.access(resolvedPath, R_OK);
+
+      return fs.createReadStream(resolvedPath);
     }
   }
 
   private isAllowedHost(hostname: string): boolean {
+    // Ensure the hostname is within allowed hosts
     return this.allowedHosts.includes(hostname);
   }
 
   private isAllowedPath(filePath: string): boolean {
-    return this.allowedFilePaths.some(allowedPath => filePath.startsWith(allowedPath));
+    // Ensure the path is within allowed directories
+    return this.allowedFilePaths.some(allowedPath => filePath.startsWith(path.normalize(allowedPath)));
   }
 
   async deleteFile(file: string): Promise<boolean> {
@@ -69,8 +69,8 @@ export class FileService {
     } else if (file.startsWith('http')) {
       throw new Error('cannot delete file from this location');
     } else {
-      file = path.resolve(process.cwd(), file);
-      await fs.promises.unlink(file);
+      const resolvedPath = path.resolve(process.cwd(), path.normalize(file));
+      await fs.promises.unlink(resolvedPath);
       return true;
     }
   }
