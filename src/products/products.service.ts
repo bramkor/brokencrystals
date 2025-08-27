@@ -3,7 +3,8 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import {
   Injectable,
   InternalServerErrorException,
-  Logger
+  Logger,
+  BadRequestException
 } from '@nestjs/common';
 import { Product } from '../model/product.entity';
 
@@ -44,6 +45,10 @@ export class ProductsService {
 
   async findLatest(limit: number): Promise<Product[]> {
     this.logger.debug(`Find ${limit} latest products`);
+    const maxLimit = 10; // Set a maximum limit to prevent excessive data retrieval
+    if (limit > maxLimit) {
+      throw new BadRequestException(`Limit cannot exceed ${maxLimit}`);
+    }
     return this.productsRepository.find(
       {},
       { limit, orderBy: { createdAt: 'desc' } }

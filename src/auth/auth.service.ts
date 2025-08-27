@@ -16,6 +16,7 @@ import { JwtTokenWithX5CKeyProcessor } from './jwt/jwt.token.with.x5c.key.proces
 import { JwtTokenWithX5UKeyProcessor } from './jwt/jwt.token.with.x5u.key.processor';
 import { JwtTokenWithHMACKeysProcessor } from './jwt/jwt.token.with.hmac.keys.processor';
 import { JwtTokenWithRSASignatureKeysProcessor } from './jwt/jwt.token.with.rsa.signature.keys.processor';
+import * as jwt from 'jsonwebtoken';
 
 export enum JwtProcessorType {
   RSA,
@@ -121,7 +122,20 @@ export class AuthService {
     );
   }
 
-  validateToken(token: string, processor: JwtProcessorType): Promise<unknown> {
+  async validateToken(token: string, processor: JwtProcessorType): Promise<unknown> {
+    if (!token) {
+      throw new Error('Token is required');
+    }
+
+    const decoded = jwt.decode(token, { complete: true });
+    if (!decoded || typeof decoded === 'string' || !decoded.header) {
+      throw new Error('Invalid token');
+    }
+
+    if (decoded.header.alg === 'none') {
+      throw new Error('None algorithm is not allowed');
+    }
+
     return this.processors.get(processor).validateToken(token);
   }
 
