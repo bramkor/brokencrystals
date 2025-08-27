@@ -73,8 +73,7 @@ export class FileController {
     schema: {
       type: 'object',
       properties: {
-        error: { type: 'string' },
-        location: { type: 'string' }
+        error: { type: 'string' }
       }
     }
   })
@@ -86,11 +85,16 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.fileService.getFile(path);
-    const type = this.getContentType(contentType);
-    res.type(type);
+    try {
+      const file: Stream = await this.fileService.getFile(path);
+      const type = this.getContentType(contentType);
+      res.type(type);
 
-    return file;
+      return file;
+    } catch (err) {
+      this.logger.error(err.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'An error occurred while processing your request.' });
+    }
   }
 
   @Get('/google')
@@ -108,8 +112,7 @@ export class FileController {
     schema: {
       type: 'object',
       properties: {
-        error: { type: 'string' },
-        location: { type: 'string' }
+        error: { type: 'string' }
       }
     }
   })
@@ -121,14 +124,19 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.GOOGLE,
-      path
-    );
-    const type = this.getContentType(contentType);
-    res.type(type);
+    try {
+      const file: Stream = await this.loadCPFile(
+        CloudProvidersMetaData.GOOGLE,
+        path
+      );
+      const type = this.getContentType(contentType);
+      res.type(type);
 
-    return file;
+      return file;
+    } catch (err) {
+      this.logger.error(err.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'An error occurred while processing your request.' });
+    }
   }
 
   @Get('/aws')
@@ -146,8 +154,7 @@ export class FileController {
     schema: {
       type: 'object',
       properties: {
-        error: { type: 'string' },
-        location: { type: 'string' }
+        error: { type: 'string' }
       }
     }
   })
@@ -159,14 +166,19 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.AWS,
-      path
-    );
-    const type = this.getContentType(contentType);
-    res.type(type);
+    try {
+      const file: Stream = await this.loadCPFile(
+        CloudProvidersMetaData.AWS,
+        path
+      );
+      const type = this.getContentType(contentType);
+      res.type(type);
 
-    return file;
+      return file;
+    } catch (err) {
+      this.logger.error(err.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'An error occurred while processing your request.' });
+    }
   }
 
   @Get('/azure')
@@ -184,8 +196,7 @@ export class FileController {
     schema: {
       type: 'object',
       properties: {
-        error: { type: 'string' },
-        location: { type: 'string' }
+        error: { type: 'string' }
       }
     }
   })
@@ -197,14 +208,19 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.AZURE,
-      path
-    );
-    const type = this.getContentType(contentType);
-    res.type(type);
+    try {
+      const file: Stream = await this.loadCPFile(
+        CloudProvidersMetaData.AZURE,
+        path
+      );
+      const type = this.getContentType(contentType);
+      res.type(type);
 
-    return file;
+      return file;
+    } catch (err) {
+      this.logger.error(err.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'An error occurred while processing your request.' });
+    }
   }
 
   @Get('/digital_ocean')
@@ -222,8 +238,7 @@ export class FileController {
     schema: {
       type: 'object',
       properties: {
-        error: { type: 'string' },
-        location: { type: 'string' }
+        error: { type: 'string' }
       }
     }
   })
@@ -235,14 +250,19 @@ export class FileController {
     @Query('type') contentType: string,
     @Res({ passthrough: true }) res: FastifyReply
   ) {
-    const file: Stream = await this.loadCPFile(
-      CloudProvidersMetaData.DIGITAL_OCEAN,
-      path
-    );
-    const type = this.getContentType(contentType);
-    res.type(type);
+    try {
+      const file: Stream = await this.loadCPFile(
+        CloudProvidersMetaData.DIGITAL_OCEAN,
+        path
+      );
+      const type = this.getContentType(contentType);
+      res.type(type);
 
-    return file;
+      return file;
+    } catch (err) {
+      this.logger.error(err.message);
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ error: 'An error occurred while processing your request.' });
+    }
   }
 
   @Delete()
@@ -292,7 +312,7 @@ export class FileController {
       }
     } catch (err) {
       this.logger.error(err.message);
-      throw err.message;
+      throw new Error('An error occurred while uploading the file.');
     }
   }
 
@@ -322,7 +342,7 @@ export class FileController {
       return stream;
     } catch (err) {
       this.logger.error(err.message);
-      res.status(HttpStatus.NOT_FOUND);
+      res.status(HttpStatus.NOT_FOUND).send({ error: 'File not found.' });
     }
   }
 }
