@@ -98,7 +98,7 @@ export class AppController {
     } catch (error) {
       throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
     }
-    return { url };
+    return { url: urlObj.toString() };
   }
 
   @Post('metadata')
