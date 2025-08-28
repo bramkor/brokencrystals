@@ -233,6 +233,14 @@ async function bootstrap() {
 
   SwaggerModule.setup('swagger', app, document);
 
+  // Disable GraphQL introspection in production
+  if (process.env.NODE_ENV === 'production') {
+    app.useGlobalPipes({
+      transform: true,
+      disableIntrospection: true
+    });
+  }
+
   await app.listen(3000, '0.0.0.0');
 }
 

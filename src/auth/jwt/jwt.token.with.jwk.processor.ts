@@ -19,16 +19,17 @@ export class JwtTokenWithJWKProcessor extends JwtTokenProcessor {
     }
 
     if (!header.jwk.kty) {
-      return payload;
+      throw new Error('Invalid JWK key type');
     }
+
     const keyLike = await jose.importJWK(header.jwk);
 
-    const res = await jose.jwtVerify(token, keyLike);
-
-    if (res) {
-      return payload;
+    try {
+      const { payload: verifiedPayload } = await jose.jwtVerify(token, keyLike);
+      return verifiedPayload;
+    } catch (error) {
+      throw new Error('Could not validate token');
     }
-    throw new Error('Could not validate token');
   }
 
   async createToken(payload: jose.JWTPayload): Promise<string> {
