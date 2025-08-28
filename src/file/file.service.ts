@@ -44,6 +44,7 @@ export class FileService {
   private isAllowedHost(hostname: string): boolean {
     const allowedHosts = [
       'metadata.google.internal',
+      '169.254.169.254', // Added to cover AWS, Azure, and Digital Ocean
       // Add other allowed hosts here
     ];
     return allowedHosts.includes(hostname);
