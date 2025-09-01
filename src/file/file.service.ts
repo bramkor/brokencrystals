@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CloudProvidersMetaData } from './cloud.providers.metadata';
 import { R_OK } from 'constants';
+import { URL } from 'url';
 
 @Injectable()
 export class FileService {
@@ -18,6 +19,28 @@ export class FileService {
 
       return fs.createReadStream(file);
     } else if (file.startsWith('http')) {
+      // Validate URL
+      let url;
+      try {
+        url = new URL(file);
+      } catch (err) {
+        throw new Error(`Invalid URL: ${file}`);
+      }
+
+      // Check if the URL is within allowed domains
+      const allowedDomains = [
+        'metadata.google.internal',
+        '169.254.169.254'
+      ];
+      if (!allowedDomains.includes(url.hostname)) {
+        throw new Error(`Access to the domain '${url.hostname}' is not allowed`);
+      }
+
+      // Ensure the URL path is valid and does not contain directory traversal
+      if (url.pathname.includes('..')) {
+        throw new Error(`Invalid URL path: ${url.pathname}`);
+      }
+
       const content = await this.cloudProviders.get(file);
 
       if (content) {
