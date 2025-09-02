@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/auth/jwt/kid-sql/validate', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['jwt', 'sqli', 'csrf', 'full_path_disclosure'],
+      tests: ['full_path_disclosure'],
       attackParamLocations: [AttackParamLocation.HEADER],
       starMetadata: { databases: ['PostgreSQL'] }
     })

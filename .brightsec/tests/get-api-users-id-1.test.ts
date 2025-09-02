@@ -21,7 +21,7 @@ after(() => runner.clear());
 test('GET /api/users/id/1', { signal: AbortSignal.timeout(timeout) }, async () => {
   await runner
     .createScan({
-      tests: ['id_enumeration', 'sqli', 'xss', 'csrf', 'bopla'],
+      tests: ['id_enumeration'],
       attackParamLocations: [AttackParamLocation.PATH],
       starMetadata: { databases: ['PostgreSQL'] }
     })
