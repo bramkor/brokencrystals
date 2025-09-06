@@ -87,7 +87,24 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedDomains = ['example.com', 'google.com']; // Define allowed domains
+    try {
+      const parsedUrl = new URL(url);
+      if (!allowedDomains.includes(parsedUrl.hostname)) {
+        throw new HttpException('Invalid redirect URL', HttpStatus.BAD_REQUEST);
+      }
+      // Ensure the URL path is not used for open redirects
+      if (parsedUrl.pathname !== '/') {
+        throw new HttpException('Invalid redirect path', HttpStatus.BAD_REQUEST);
+      }
+      // Ensure no query parameters are present
+      if (parsedUrl.search) {
+        throw new HttpException('Query parameters are not allowed', HttpStatus.BAD_REQUEST);
+      }
+      return { url: parsedUrl.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
