@@ -169,7 +169,11 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
-    return config;
+    return {
+      awsBucket: config.awsBucket,
+      sql: 'Sensitive data hidden',
+      googlemaps: 'Sensitive data hidden'
+    };
   }
 
   @Get('/secrets')
