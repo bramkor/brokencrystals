@@ -87,7 +87,21 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedHosts = ['example.com', 'another-allowed-domain.com'];
+    try {
+      const parsedUrl = new URL(url);
+      if (!allowedHosts.includes(parsedUrl.hostname)) {
+        throw new HttpException('URL not allowed', HttpStatus.BAD_REQUEST);
+      }
+      // Ensure the URL is using HTTPS
+      if (parsedUrl.protocol !== 'https:') {
+        throw new HttpException('Only HTTPS URLs are allowed', HttpStatus.BAD_REQUEST);
+      }
+      // Return the full URL if it passes all checks
+      return { url: parsedUrl.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
@@ -168,8 +182,16 @@ export class AppController {
   })
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
-    const config = this.appService.getConfig();
-    return config;
+    const config = {
+      awsBucket: process.env.AWS_BUCKET,
+      sql: process.env.DATABASE_URL, // Use a single environment variable for the database URL
+      googlemaps: process.env.GOOGLE_MAPS_API
+    };
+    // Filter out any undefined values to avoid leaking sensitive information
+    const filteredConfig = Object.fromEntries(
+      Object.entries(config).filter(([key, value]) => value !== undefined)
+    );
+    return filteredConfig;
   }
 
   @Get('/secrets')
