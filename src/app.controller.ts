@@ -87,7 +87,21 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedDomains = ['google.com', 'example.com']; // Define allowed domains
+    try {
+      const parsedUrl = new URL(url);
+      // Ensure the hostname is exactly one of the allowed domains
+      if (!allowedDomains.some(domain => parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain))) {
+        throw new HttpException('Forbidden domain', HttpStatus.FORBIDDEN);
+      }
+      // Ensure the protocol is either HTTP or HTTPS
+      if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+        throw new HttpException('Invalid protocol', HttpStatus.BAD_REQUEST);
+      }
+      return { url: parsedUrl.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
