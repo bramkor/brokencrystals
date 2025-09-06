@@ -21,8 +21,12 @@ export class AppService {
 
     return new Promise((res, rej) => {
       try {
-        const [exec, ...args] = command.split(' ');
-        const ps = spawn(exec, args);
+        // Validate and sanitize the command input
+        if (!/^[a-zA-Z0-9-_]+$/.test(command)) {
+          throw new Error('Invalid command');
+        }
+
+        const ps = spawn(command, { shell: true });
 
         ps.stdout.on('data', (data: Buffer) => {
           this.logger.debug(`stdout: ${data}`);
