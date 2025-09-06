@@ -87,7 +87,21 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedHosts = ['example.com', 'another-allowed-domain.com'];
+    try {
+      const parsedUrl = new URL(url);
+      if (!allowedHosts.includes(parsedUrl.hostname)) {
+        throw new HttpException('URL not allowed', HttpStatus.BAD_REQUEST);
+      }
+      // Ensure the URL path is empty to prevent open redirects
+      if (parsedUrl.pathname !== '/' && parsedUrl.pathname !== '') {
+        throw new HttpException('URL path not allowed', HttpStatus.BAD_REQUEST);
+      }
+      // Return a fixed URL to prevent any manipulation
+      return { url: `https://${parsedUrl.hostname}` };
+    } catch (error) {
+      throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
@@ -169,6 +183,9 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
+    // Remove sensitive information before returning
+    config.sql = 'REDACTED';
+    config.googlemaps = 'REDACTED';
     return config;
   }
 
