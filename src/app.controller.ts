@@ -87,7 +87,17 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedUrls = ['example.com', 'another-allowed-site.com'];
+    try {
+      const parsedUrl = new URL(url);
+      // Check against the allowlist using the hostname instead of origin
+      if (!allowedUrls.includes(parsedUrl.hostname)) {
+        throw new HttpException('URL not allowed', HttpStatus.BAD_REQUEST);
+      }
+      return { url: parsedUrl.toString() };
+    } catch (error) {
+      throw new HttpException('Invalid URL format', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
@@ -169,7 +179,11 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
-    return config;
+    return {
+      awsBucket: config.awsBucket,
+      sql: 'Sensitive information hidden',
+      googlemaps: 'Sensitive information hidden'
+    };
   }
 
   @Get('/secrets')
