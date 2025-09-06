@@ -87,7 +87,21 @@ export class AppController {
   })
   @Redirect()
   async redirect(@Query('url') url: string) {
-    return { url };
+    const allowedDomains = ['example.com', 'another-allowed-domain.com'];
+    try {
+      const parsedUrl = new URL(url);
+      if (!allowedDomains.includes(parsedUrl.hostname)) {
+        throw new HttpException('URL not allowed', HttpStatus.FORBIDDEN);
+      }
+      // Ensure the URL is not modified by using the original protocol and host
+      if (parsedUrl.protocol !== 'https:') {
+        throw new HttpException('Only HTTPS protocol is allowed', HttpStatus.FORBIDDEN);
+      }
+      // Return only the hostname and pathname to prevent open redirects
+      return { url: `${parsedUrl.protocol}//${parsedUrl.hostname}${parsedUrl.pathname}` };
+    } catch (error) {
+      throw new HttpException('Invalid URL', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('metadata')
@@ -169,7 +183,11 @@ export class AppController {
   getConfig(): AppConfig {
     this.logger.debug('Called getConfig');
     const config = this.appService.getConfig();
-    return config;
+    return {
+      awsBucket: config.awsBucket,
+      sql: 'Sensitive data hidden',
+      googlemaps: 'Sensitive data hidden'
+    };
   }
 
   @Get('/secrets')
